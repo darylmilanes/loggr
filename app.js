@@ -32,8 +32,13 @@ const COUNTRY_TIMEZONES = {
     "UAE": "Asia/Dubai"
 };
 
-// --- Icons (Compacted for file size) ---
-const IconWrapper = ({ children, size = 24, className = "", onClick }) => <svg onClick={onClick} xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>{children}</svg>;
+// --- Icons ---
+const IconWrapper = ({ children, size = 24, className = "", onClick }) => (
+    <svg onClick={onClick} xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+        {children}
+    </svg>
+);
+
 const BarChart2 = (props) => <IconWrapper {...props}><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></IconWrapper>;
 const Plus = (props) => <IconWrapper {...props}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></IconWrapper>;
 const Trash2 = (props) => <IconWrapper {...props}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></IconWrapper>;
@@ -63,7 +68,8 @@ const AlertTriangle = (props) => <IconWrapper {...props}><path d="M10.29 3.86L1.
 // --- Styling Injection ---
 const style = document.createElement('style');
 style.innerHTML = `
-  input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type=number]::-webkit-inner-spin-button, 
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
   input[type=number] { -moz-appearance: textfield; }
   .toast-enter { transform: translateY(100%); opacity: 0; }
   .toast-enter-active { transform: translateY(0); opacity: 1; transition: all 300ms ease-out; }
@@ -92,25 +98,60 @@ const Toast = ({ message, show, onClose }) => {
 };
 
 const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false }) => {
+    const baseStyle = "w-full py-3 rounded-lg font-medium transition-all active:scale-95 flex items-center justify-center gap-2";
     const variants = { primary: "bg-brand-600 text-white hover:bg-brand-700 shadow-md shadow-brand-200", secondary: "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50", danger: "bg-red-50 text-red-600 hover:bg-red-100", ghost: "text-brand-600 hover:bg-brand-50", disabled: "bg-slate-200 text-slate-400 cursor-not-allowed" };
-    return <button onClick={onClick} disabled={disabled} className={`w-full py-3 rounded-lg font-medium transition-all active:scale-95 flex items-center justify-center gap-2 ${disabled ? variants.disabled : variants[variant]} ${className}`}>{children}</button>;
+    return <button onClick={onClick} disabled={disabled} className={`${baseStyle} ${disabled ? variants.disabled : variants[variant]} ${className}`}>{children}</button>;
 };
 
-const Input = ({ label, value, onChange, placeholder, type = "text", error, list }) => (
-    <div className="mb-4">{label && <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>}<input type={type} value={value} onChange={onChange} placeholder={placeholder} list={list} className={`w-full p-3 rounded-lg bg-white border ${error ? 'border-red-500' : 'border-slate-200'} focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all`} />{error && <p className="text-xs text-red-500 mt-1">{error}</p>}</div>
+const Input = ({ label, value, onChange, placeholder, type = "text", error, list, className = "" }) => (
+    <div className={`mb-4 ${className}`}>
+        {label && <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>}
+        <input type={type} value={value} onChange={onChange} placeholder={placeholder} list={list} className={`w-full p-3 rounded-lg bg-white border ${error ? 'border-red-500' : 'border-slate-200'} focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all`} />
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+    </div>
 );
 
 const Select = ({ label, value, onChange, options, error, placeholder = "Select an option" }) => (
-    <div className="mb-4">{label && <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>}<select value={value} onChange={onChange} className={`w-full p-3 rounded-lg bg-white border ${error ? 'border-red-500' : 'border-slate-200'} focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all`}><option value="">{placeholder}</option>{options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}</select>{error && <p className="text-xs text-red-500 mt-1">{error}</p>}</div>
+    <div className="mb-4">
+        {label && <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>}
+        <select value={value} onChange={onChange} className={`w-full p-3 rounded-lg bg-white border ${error ? 'border-red-500' : 'border-slate-200'} focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all`}>
+            <option value="">{placeholder}</option>
+            {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+        </select>
+        {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
+    </div>
 );
 
 const SearchableSelect = ({ value, onChange, options, placeholder }) => {
-    const [isOpen, setIsOpen] = React.useState(false); const [search, setSearch] = React.useState(""); const wrapperRef = React.useRef(null);
-    React.useEffect(() => { function handleClickOutside(event) { if (wrapperRef.current && !wrapperRef.current.contains(event.target)) setIsOpen(false); } document.addEventListener("mousedown", handleClickOutside); return () => document.removeEventListener("mousedown", handleClickOutside); }, [wrapperRef]);
+    const [isOpen, setIsOpen] = React.useState(false);
+    const [search, setSearch] = React.useState("");
+    const wrapperRef = React.useRef(null);
+
+    React.useEffect(() => {
+        function handleClickOutside(event) { if (wrapperRef.current && !wrapperRef.current.contains(event.target)) setIsOpen(false); }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [wrapperRef]);
+
     const filteredOptions = options.filter(o => o.label.toLowerCase().includes(search.toLowerCase()));
+
     return (
-        <div className="relative w-full" ref={wrapperRef}><div className="w-full p-2 bg-slate-800 text-white text-sm rounded-lg border-none flex justify-between items-center cursor-pointer h-[38px]" onClick={() => setIsOpen(!isOpen)}><span className={`truncate ${!value ? "text-slate-400" : ""}`}>{value || placeholder}</span><ChevronDown size={14} className="ml-2 text-slate-400 flex-shrink-0" /></div>
-            {isOpen && (<div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl z-50 overflow-hidden border border-slate-200"><input type="text" className="w-full p-2 text-sm border-b border-slate-100 focus:outline-none text-slate-800" placeholder="Type to search..." value={search} onChange={(e) => setSearch(e.target.value)} autoFocus onClick={(e) => e.stopPropagation()} /><div className="max-h-40 overflow-y-auto"><div className="p-2 text-sm text-slate-600 hover:bg-brand-50 cursor-pointer" onClick={() => { onChange(""); setIsOpen(false); setSearch(""); }}>All Positions</div>{filteredOptions.length > 0 ? filteredOptions.map(opt => (<div key={opt.value} className="p-2 text-sm text-slate-800 hover:bg-brand-50 cursor-pointer" onClick={() => { onChange(opt.value); setIsOpen(false); setSearch(""); }}>{opt.label}</div>)) : <div className="p-2 text-xs text-slate-400 italic">No matches found</div>}</div></div>)}
+        <div className="relative w-full" ref={wrapperRef}>
+            <div className="w-full p-2 bg-slate-800 text-white text-sm rounded-lg border-none flex justify-between items-center cursor-pointer h-[38px]" onClick={() => setIsOpen(!isOpen)}>
+                <span className={`truncate ${!value ? "text-slate-400" : ""}`}>{value || placeholder}</span>
+                <ChevronDown size={14} className="ml-2 text-slate-400 flex-shrink-0" />
+            </div>
+            {isOpen && (
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl z-50 overflow-hidden border border-slate-200">
+                    <input type="text" className="w-full p-2 text-sm border-b border-slate-100 focus:outline-none text-slate-800" placeholder="Type to search..." value={search} onChange={(e) => setSearch(e.target.value)} autoFocus onClick={(e) => e.stopPropagation()} />
+                    <div className="max-h-40 overflow-y-auto">
+                        <div className="p-2 text-sm text-slate-600 hover:bg-brand-50 cursor-pointer" onClick={() => { onChange(""); setIsOpen(false); setSearch(""); }}>All Positions</div>
+                        {filteredOptions.length > 0 ? filteredOptions.map(opt => (
+                            <div key={opt.value} className="p-2 text-sm text-slate-800 hover:bg-brand-50 cursor-pointer" onClick={() => { onChange(opt.value); setIsOpen(false); setSearch(""); }}>{opt.label}</div>
+                        )) : <div className="p-2 text-xs text-slate-400 italic">No matches found</div>}
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
@@ -157,39 +198,165 @@ const DateStrip = ({ selectedDate, onSelect, timezone }) => {
     return <div className="flex gap-2 overflow-x-auto hide-scrollbar py-2 mb-4 -mx-4 px-4 bg-white border-b border-slate-100 sticky top-0 z-10">{dates.map((date, idx) => { const dateStr = formatDate(date); const isSelected = dateStr === selectedDate; const isToday = dateStr === todayStr; return <button key={idx} onClick={() => onSelect(dateStr)} className={`flex flex-col items-center justify-center min-w-[60px] p-2 rounded-xl transition-all border ${isSelected ? 'bg-brand-600 text-white border-brand-600 shadow-md' : 'bg-slate-50 text-slate-500 border-transparent'}`}><span className="text-xs font-medium uppercase">{date.toLocaleDateString('en-US', { weekday: 'short' })}</span><span className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-slate-800'}`}>{date.getDate()}</span>{isToday && <span className="text-[10px] mt-1 font-bold">Today</span>}</button> })}</div>;
 };
 
-// --- Modals Logic ---
+// --- Modals for Org Config & Profile ---
+
 const AdminConfigModal = ({ isOpen, onClose }) => {
-    const [orgStructure, setOrgStructure] = React.useState({}); const [newDept, setNewDept] = React.useState(""); const [newPos, setNewPos] = React.useState(""); const [selectedDeptForPos, setSelectedDeptForPos] = React.useState("");
-    React.useEffect(() => { if (!isOpen) return; return onSnapshot(doc(db, "artifacts", APP_ID, "public", "config"), (docSnap) => { if (docSnap.exists()) setOrgStructure(docSnap.data().orgStructure || {}); }); }, [isOpen]);
-    const handleAddDept = async () => { if (!newDept.trim()) return; await setDoc(doc(db, "artifacts", APP_ID, "public", "config"), { orgStructure: { [newDept]: [] } }, { merge: true }); setNewDept(""); };
-    const handleAddPos = async () => { if (!newPos.trim() || !selectedDeptForPos) return; await updateDoc(doc(db, "artifacts", APP_ID, "public", "config"), { [`orgStructure.${selectedDeptForPos}`]: arrayUnion(newPos) }); setNewPos(""); };
-    const handleDeleteDept = async (dept) => { await updateDoc(doc(db, "artifacts", APP_ID, "public", "config"), { [`orgStructure.${dept}`]: deleteField() }); if (selectedDeptForPos === dept) setSelectedDeptForPos(""); };
-    const handleDeletePos = async (dept, pos) => { await updateDoc(doc(db, "artifacts", APP_ID, "public", "config"), { [`orgStructure.${dept}`]: arrayRemove(pos) }); };
+    const [orgStructure, setOrgStructure] = React.useState({});
+    const [newDept, setNewDept] = React.useState("");
+    const [newPos, setNewPos] = React.useState("");
+    const [selectedDeptForPos, setSelectedDeptForPos] = React.useState("");
+
+    React.useEffect(() => {
+        if (!isOpen) return;
+        const unsub = onSnapshot(doc(db, "artifacts", APP_ID, "public", "config"), (docSnap) => {
+            if (docSnap.exists()) {
+                setOrgStructure(docSnap.data().orgStructure || {});
+            }
+        });
+        return () => unsub();
+    }, [isOpen]);
+
+    const handleAddDept = async () => {
+        if (!newDept.trim()) return;
+        const ref = doc(db, "artifacts", APP_ID, "public", "config");
+        await setDoc(ref, { orgStructure: { [newDept]: [] } }, { merge: true });
+        setNewDept("");
+    };
+
+    const handleAddPos = async () => {
+        if (!newPos.trim() || !selectedDeptForPos) return;
+        const ref = doc(db, "artifacts", APP_ID, "public", "config");
+        await updateDoc(ref, { [`orgStructure.${selectedDeptForPos}`]: arrayUnion(newPos) });
+        setNewPos("");
+    };
+
+    const handleDeleteDept = async (dept) => {
+        const ref = doc(db, "artifacts", APP_ID, "public", "config");
+        await updateDoc(ref, { [`orgStructure.${dept}`]: deleteField() });
+        if (selectedDeptForPos === dept) setSelectedDeptForPos("");
+    };
+
+    const handleDeletePos = async (dept, pos) => {
+        const ref = doc(db, "artifacts", APP_ID, "public", "config");
+        await updateDoc(ref, { [`orgStructure.${dept}`]: arrayRemove(pos) });
+    };
+
     const departments = Object.keys(orgStructure);
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Manage Organization">
             <div className="space-y-6">
-                <div><h4 className="font-bold text-slate-700 mb-2 flex items-center gap-2"><Briefcase size={16}/> Departments</h4><div className="flex gap-2 mb-2"><input type="text" value={newDept} onChange={e => setNewDept(e.target.value)} placeholder="New Department Name" className="flex-1 p-2 border rounded-lg text-sm" /><button onClick={handleAddDept} className="bg-brand-600 text-white p-2 rounded-lg"><Plus size={18}/></button></div><div className="flex flex-wrap gap-2 mb-4">{departments.map(d => (<span key={d} className="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded flex items-center gap-1 border border-slate-200">{d} <button onClick={() => handleDeleteDept(d)} className="text-slate-400 hover:text-red-500 ml-1"><X size={12}/></button></span>))}</div></div>
-                <div><h4 className="font-bold text-slate-700 mb-2 flex items-center gap-2"><Globe size={16}/> Positions by Dept</h4><div className="space-y-2 mb-2"><select value={selectedDeptForPos} onChange={e => setSelectedDeptForPos(e.target.value)} className="w-full p-2 border rounded-lg text-sm bg-slate-50"><option value="">Select Department to Add Position</option>{departments.map(d => <option key={d} value={d}>{d}</option>)}</select><div className="flex gap-2"><input type="text" value={newPos} onChange={e => setNewPos(e.target.value)} placeholder={selectedDeptForPos ? `New Position for ${selectedDeptForPos}` : "Select Department First"} disabled={!selectedDeptForPos} className="flex-1 p-2 border rounded-lg text-sm disabled:bg-slate-100" /><button onClick={handleAddPos} disabled={!selectedDeptForPos} className="bg-brand-600 text-white p-2 rounded-lg disabled:opacity-50"><Plus size={18}/></button></div></div><div className="bg-slate-50 p-3 rounded-lg border border-slate-100 max-h-40 overflow-y-auto">{selectedDeptForPos ? ((orgStructure[selectedDeptForPos] || []).length > 0 ? (<div className="flex flex-wrap gap-2">{orgStructure[selectedDeptForPos].map(p => (<span key={p} className="text-xs bg-white text-slate-700 px-2 py-1 rounded border border-slate-200 flex items-center gap-1">{p} <button onClick={() => handleDeletePos(selectedDeptForPos, p)} className="text-slate-400 hover:text-red-500 ml-1"><X size={12}/></button></span>))}</div>) : <p className="text-xs text-slate-400 italic">No positions added yet.</p>) : <p className="text-xs text-slate-400 italic">Select a department above to manage positions.</p>}</div></div>
+                <div>
+                    <h4 className="font-bold text-slate-700 mb-2 flex items-center gap-2"><Briefcase size={16}/> Departments</h4>
+                    <div className="flex gap-2 mb-2">
+                        <input type="text" value={newDept} onChange={e => setNewDept(e.target.value)} placeholder="New Department Name" className="flex-1 p-2 border rounded-lg text-sm" />
+                        <button onClick={handleAddDept} className="bg-brand-600 text-white p-2 rounded-lg"><Plus size={18}/></button>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                        {departments.map(d => (
+                            <span key={d} className="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded flex items-center gap-1 border border-slate-200">
+                                {d} 
+                                <button onClick={() => handleDeleteDept(d)} className="text-slate-400 hover:text-red-500 ml-1"><X size={12}/></button>
+                            </span>
+                        ))}
+                    </div>
+                </div>
+                <div>
+                    <h4 className="font-bold text-slate-700 mb-2 flex items-center gap-2"><Globe size={16}/> Positions by Dept</h4>
+                    <div className="space-y-2 mb-2">
+                        <select 
+                            value={selectedDeptForPos} 
+                            onChange={e => setSelectedDeptForPos(e.target.value)} 
+                            className="w-full p-2 border rounded-lg text-sm bg-slate-50"
+                        >
+                            <option value="">Select Department to Add Position</option>
+                            {departments.map(d => <option key={d} value={d}>{d}</option>)}
+                        </select>
+                        <div className="flex gap-2">
+                            <input 
+                                type="text" 
+                                value={newPos} 
+                                onChange={e => setNewPos(e.target.value)} 
+                                placeholder={selectedDeptForPos ? `New Position for ${selectedDeptForPos}` : "Select Department First"} 
+                                disabled={!selectedDeptForPos}
+                                className="flex-1 p-2 border rounded-lg text-sm disabled:bg-slate-100" 
+                            />
+                            <button onClick={handleAddPos} disabled={!selectedDeptForPos} className="bg-brand-600 text-white p-2 rounded-lg disabled:opacity-50"><Plus size={18}/></button>
+                        </div>
+                    </div>
+                    <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 max-h-40 overflow-y-auto">
+                        {selectedDeptForPos ? (
+                            (orgStructure[selectedDeptForPos] || []).length > 0 ? (
+                                <div className="flex flex-wrap gap-2">
+                                    {orgStructure[selectedDeptForPos].map(p => (
+                                        <span key={p} className="text-xs bg-white text-slate-700 px-2 py-1 rounded border border-slate-200 flex items-center gap-1">
+                                            {p} 
+                                            <button onClick={() => handleDeletePos(selectedDeptForPos, p)} className="text-slate-400 hover:text-red-500 ml-1"><X size={12}/></button>
+                                        </span>
+                                    ))}
+                                </div>
+                            ) : <p className="text-xs text-slate-400 italic">No positions added yet.</p>
+                        ) : <p className="text-xs text-slate-400 italic">Select a department above to manage positions.</p>}
+                    </div>
+                </div>
             </div>
         </Modal>
     );
 };
 
 const ProfileModal = ({ isOpen, onClose, user, userSettings, isMandatory = false }) => {
-    const [name, setName] = React.useState(""); const [country, setCountry] = React.useState(""); const [dept, setDept] = React.useState(""); const [pos, setPos] = React.useState(""); const [orgStructure, setOrgStructure] = React.useState({}); const [loading, setLoading] = React.useState(false); const [error, setError] = React.useState("");
-    React.useEffect(() => { if (!isOpen) return; setName(user.displayName || ""); setCountry(userSettings?.country || ""); setDept(userSettings?.department || ""); setPos(userSettings?.position || ""); getDoc(doc(db, "artifacts", APP_ID, "public", "config")).then(snap => { if (snap.exists()) setOrgStructure(snap.data().orgStructure || {}); }); }, [isOpen, user, userSettings]);
-    const handleSave = async () => { setLoading(true); setError(""); try { const detectedTimezone = COUNTRY_TIMEZONES[country] || Intl.DateTimeFormat().resolvedOptions().timeZone; await updateProfile(auth.currentUser, { displayName: name }); await setDoc(doc(db, "artifacts", APP_ID, "users", user.uid, "settings", "profile"), { country, timezone: detectedTimezone, department: dept, position: pos, userName: name, email: user.email, uid: user.uid }, { merge: true }); await setDoc(doc(db, "artifacts", APP_ID, "public", "data", "employees", user.uid), { country, department: dept, position: pos, userName: name }, { merge: true }); onClose(); window.location.reload(); } catch (err) { setError(err.message); } finally { setLoading(false); } };
-    const deptOptions = Object.keys(orgStructure).map(d => ({ value: d, label: d })); const availablePositions = dept ? (orgStructure[dept] || []) : []; const posOptions = availablePositions.map(p => ({ value: p, label: p }));
+    const [name, setName] = React.useState("");
+    const [country, setCountry] = React.useState("");
+    const [dept, setDept] = React.useState("");
+    const [pos, setPos] = React.useState("");
+    const [orgStructure, setOrgStructure] = React.useState({});
+    const [loading, setLoading] = React.useState(false);
+
+    React.useEffect(() => {
+        if (!isOpen) return;
+        setName(user.displayName || "");
+        setCountry(userSettings?.country || "");
+        setDept(userSettings?.department || "");
+        setPos(userSettings?.position || "");
+        
+        getDoc(doc(db, "artifacts", APP_ID, "public", "config")).then(snap => {
+            if (snap.exists()) setOrgStructure(snap.data().orgStructure || {});
+        });
+    }, [isOpen, user, userSettings]);
+
+    const handleSave = async () => {
+        setLoading(true);
+        try {
+            const detectedTimezone = COUNTRY_TIMEZONES[country] || Intl.DateTimeFormat().resolvedOptions().timeZone;
+            await updateProfile(auth.currentUser, { displayName: name });
+            const userRef = doc(db, "artifacts", APP_ID, "users", user.uid, "settings", "profile");
+            const employeeRef = doc(db, "artifacts", APP_ID, "public", "data", "employees", user.uid);
+            const data = { country, timezone: detectedTimezone, department: dept, position: pos, userName: name, email: user.email, uid: user.uid };
+            await setDoc(userRef, data, { merge: true });
+            await setDoc(employeeRef, data, { merge: true }); // Sync to public directory
+            onClose(); window.location.reload(); 
+        } catch (err) {
+            alert("Error saving profile: " + err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const countryOptions = Object.keys(COUNTRY_TIMEZONES).map(c => ({ value: c, label: c }));
+    const deptOptions = Object.keys(orgStructure).map(d => ({ value: d, label: d }));
+    const availablePositions = dept ? (orgStructure[dept] || []) : [];
+    const posOptions = availablePositions.map(p => ({ value: p, label: p }));
+    const isValid = name && country && dept && pos;
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} title={isMandatory ? "Setup Profile" : "Edit Profile"} allowClose={!isMandatory}>
             <div className="space-y-4">
-                {isMandatory && <div className="bg-blue-50 text-blue-700 text-sm p-3 rounded-lg border border-blue-200 mb-4">Welcome! Please complete your profile to continue.</div>}
-                <Input label="Full Name" value={name} onChange={e => setName(e.target.value)} /><Select label="Country" value={country} onChange={e => setCountry(e.target.value)} options={Object.keys(COUNTRY_TIMEZONES).map(c => ({ value: c, label: c }))} />
+                {isMandatory && <div className="bg-blue-50 text-blue-700 text-sm p-3 rounded-lg border border-blue-200 mb-4">Welcome to Loggr! Please complete your profile to continue.</div>}
+                <Input label="Full Name" value={name} onChange={e => setName(e.target.value)} />
+                <Select label="Country" value={country} onChange={e => setCountry(e.target.value)} options={countryOptions} />
                 <Select label="Department" value={dept} onChange={e => { setDept(e.target.value); setPos(""); }} options={deptOptions} placeholder="Select Department" />
                 <Select label="Position" value={pos} onChange={e => setPos(e.target.value)} options={posOptions} placeholder={dept ? "Select Position" : "Select Department First"} />
-                {error && <p className="text-red-500 text-xs">{error}</p>}
-                <Button onClick={handleSave} disabled={loading || (isMandatory && !(name && country && dept && pos))}>{loading ? "Saving..." : "Save & Continue"}</Button>
+                <Button onClick={handleSave} disabled={loading || (isMandatory && !isValid)}>{loading ? "Saving..." : "Save & Continue"}</Button>
             </div>
         </Modal>
     );
@@ -197,16 +364,71 @@ const ProfileModal = ({ isOpen, onClose, user, userSettings, isMandatory = false
 
 // --- Auth Components ---
 const AuthScreen = ({ onLogin }) => {
-    const [isLogin, setIsLogin] = React.useState(true); const [step, setStep] = React.useState(1); const [firstName, setFirstName] = React.useState(""); const [lastName, setLastName] = React.useState(""); const [country, setCountry] = React.useState(""); const [dept, setDept] = React.useState(""); const [pos, setPos] = React.useState(""); const [password, setPassword] = React.useState(""); const [confirmPassword, setConfirmPassword] = React.useState(""); const [email, setEmail] = React.useState(""); const [workConfig, setWorkConfig] = React.useState({ enabled: true, start: "09:00", end: "17:00", lunchMinutes: "60" }); const [showPass, setShowPass] = React.useState(false); const [showConfirmPass, setShowConfirmPass] = React.useState(false); const [error, setError] = React.useState(""); const [loading, setLoading] = React.useState(false); const [showSuccessModal, setShowSuccessModal] = React.useState(false); const [orgStructure, setOrgStructure] = React.useState({}); const [alertModal, setAlertModal] = React.useState({ isOpen: false, title: "", message: "" });
-    React.useEffect(() => { getDoc(doc(db, "artifacts", APP_ID, "public", "config")).then(snap => { if (snap.exists()) setOrgStructure(snap.data().orgStructure || {}); }); }, []);
-    const toggleMode = () => { setIsLogin(!isLogin); setError(""); setStep(1); setPassword(""); setConfirmPassword(""); };
-    const handleLogin = async (e) => { e.preventDefault(); setError(""); setLoading(true); try { let loginEmail = email; if (email.trim() === 'admin') loginEmail = 'admin@loggr.com'; else if (!email.includes('@')) throw new Error("Please enter full email address."); await signInWithEmailAndPassword(auth, loginEmail, password); } catch (err) { setError(err.message.replace("Firebase:", "").trim()); setLoading(false); } };
-    const handleForgotPassword = async () => { if (!email || !email.includes('@')) { setError("Please enter your email address to reset password."); return; } try { await sendPasswordResetEmail(auth, email); setAlertModal({ isOpen: true, title: "Reset Link Sent", message: `Password reset link sent to ${email}. Check your inbox.` }); } catch (err) { setError(err.message.replace("Firebase:", "").trim()); } };
-    const handleNextStep = (e) => { e.preventDefault(); if (!firstName || !lastName || !email || !country || !password || !confirmPassword) { setError("All fields in Step 1 are required."); return; } if (password !== confirmPassword) { setError("Passwords do not match."); return; } setError(""); setStep(2); };
-    const handleRegister = async () => { setError(""); setLoading(true); try { if (workConfig.enabled && (!workConfig.start || !workConfig.end || !workConfig.lunchMinutes)) throw new Error("Please fill out all Work Settings or uncheck 'Enabled'."); const userCredential = await createUserWithEmailAndPassword(auth, email, password); const user = userCredential.user; const detectedTimezone = COUNTRY_TIMEZONES[country] || Intl.DateTimeFormat().resolvedOptions().timeZone; await updateProfile(user, { displayName: `${firstName} ${lastName}` }); const userData = { country, timezone: detectedTimezone, department: dept || "N/A", position: pos || "N/A", workConfig, userName: `${firstName} ${lastName}`, email: email, uid: user.uid, disabled: false }; await setDoc(doc(db, "artifacts", APP_ID, "users", user.uid, "settings", "profile"), userData); await setDoc(doc(db, "artifacts", APP_ID, "public", "data", "employees", user.uid), userData); setLoading(false); setShowSuccessModal(true); } catch (err) { setError(err.message.replace("Firebase:", "").trim()); setLoading(false); } };
-    const deptOptions = Object.keys(orgStructure).map(d => ({ value: d, label: d })); const availablePositions = dept ? (orgStructure[dept] || []) : []; const posOptions = availablePositions.map(p => ({ value: p, label: p }));
+    const [isLogin, setIsLogin] = React.useState(true);
+    const [step, setStep] = React.useState(1);
+    const [firstName, setFirstName] = React.useState("");
+    const [lastName, setLastName] = React.useState("");
+    const [country, setCountry] = React.useState("");
+    const [dept, setDept] = React.useState("");
+    const [pos, setPos] = React.useState("");
+    const [password, setPassword] = React.useState("");
+    const [confirmPassword, setConfirmPassword] = React.useState("");
+    const [email, setEmail] = React.useState(""); 
+    const [workConfig, setWorkConfig] = React.useState({ enabled: true, start: "09:00", end: "17:00", lunchMinutes: "60" });
+    const [showPass, setShowPass] = React.useState(false);
+    const [showConfirmPass, setShowConfirmPass] = React.useState(false);
+    const [error, setError] = React.useState("");
+    const [loading, setLoading] = React.useState(false);
+    const [showSuccessModal, setShowSuccessModal] = React.useState(false);
+    const [orgStructure, setOrgStructure] = React.useState({});
+    const [alertModal, setAlertModal] = React.useState({ isOpen: false, title: "", message: "" });
 
-    if (showSuccessModal) return <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-900"><div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 text-center fade-in"><div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle size={32} /></div><h2 className="text-2xl font-bold text-slate-800 mb-2">Account Created!</h2><p className="text-slate-500 mb-6">Here are your credentials.</p><div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-left space-y-3 mb-6"><div><p className="text-xs font-bold text-slate-400 uppercase">Name</p><p className="font-medium text-slate-800">{firstName} {lastName}</p></div><div><p className="text-xs font-bold text-slate-400 uppercase">Email</p><p className="font-medium text-slate-800">{email}</p></div><div><p className="text-xs font-bold text-slate-400 uppercase">Password</p><p className="font-mono text-slate-800 bg-white border border-slate-200 p-1 rounded inline-block">{password}</p></div><div><p className="text-xs font-bold text-slate-400 uppercase">Country</p><p className="font-medium text-slate-800">{country}</p></div></div><Button onClick={() => window.location.reload()}>Go to Dashboard</Button></div></div>;
+    React.useEffect(() => {
+        getDoc(doc(db, "artifacts", APP_ID, "public", "config")).then(snap => {
+            if (snap.exists()) setOrgStructure(snap.data().orgStructure || {});
+        });
+    }, []);
+
+    const toggleMode = () => { setIsLogin(!isLogin); setError(""); setStep(1); setPassword(""); setConfirmPassword(""); };
+    const handleLogin = async (e) => {
+        e.preventDefault(); setError(""); setLoading(true);
+        try { 
+            let loginEmail = email; if (email.trim() === 'admin') loginEmail = 'admin@loggr.com'; else if (!email.includes('@')) throw new Error("Please enter full email address."); 
+            await signInWithEmailAndPassword(auth, loginEmail, password); 
+            // Disabled check is handled in App wrapper
+        } catch (err) { setError(err.message.replace("Firebase:", "").trim()); setLoading(false); }
+    };
+    const handleForgotPassword = async () => {
+        if (!email || !email.includes('@')) { setError("Please enter your email address to reset password."); return; }
+        try { await sendPasswordResetEmail(auth, email); setAlertModal({ isOpen: true, title: "Reset Link Sent", message: `Password reset link sent to ${email}. Check your inbox.` }); } catch (err) { setError(err.message.replace("Firebase:", "").trim()); }
+    };
+    const handleNextStep = (e) => {
+        e.preventDefault();
+        if (!firstName || !lastName || !email || !country || !password || !confirmPassword) { setError("All fields in Step 1 are required."); return; }
+        if (password !== confirmPassword) { setError("Passwords do not match."); return; }
+        setError(""); setStep(2);
+    };
+    const handleRegister = async () => {
+        setError(""); setLoading(true);
+        try {
+            if (workConfig.enabled && (!workConfig.start || !workConfig.end || !workConfig.lunchMinutes)) throw new Error("Please fill out all Work Settings or uncheck 'Enabled'.");
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            const detectedTimezone = COUNTRY_TIMEZONES[country] || Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const displayName = `${firstName} ${lastName}`;
+            await updateProfile(user, { displayName });
+            const userData = { country, timezone: detectedTimezone, department: dept || "N/A", position: pos || "N/A", workConfig, userName: displayName, email: email, uid: user.uid, disabled: false };
+            await setDoc(doc(db, "artifacts", APP_ID, "users", user.uid, "settings", "profile"), userData);
+            await setDoc(doc(db, "artifacts", APP_ID, "public", "data", "employees", user.uid), userData); // Sync to directory
+            setLoading(false); setShowSuccessModal(true);
+        } catch (err) { setError(err.message.replace("Firebase:", "").trim()); setLoading(false); }
+    };
+    const countryOptions = Object.keys(COUNTRY_TIMEZONES).map(c => ({ value: c, label: c }));
+    const deptOptions = Object.keys(orgStructure).map(d => ({ value: d, label: d }));
+    const availablePositions = dept ? (orgStructure[dept] || []) : [];
+    const posOptions = availablePositions.map(p => ({ value: p, label: p }));
+
+    if (showSuccessModal) { return <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-900"><div className="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 text-center fade-in"><div className="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4"><CheckCircle size={32} /></div><h2 className="text-2xl font-bold text-slate-800 mb-2">Account Created!</h2><p className="text-slate-500 mb-6">Here are your credentials.</p><div className="bg-slate-50 p-4 rounded-xl border border-slate-100 text-left space-y-3 mb-6"><div><p className="text-xs font-bold text-slate-400 uppercase">Name</p><p className="font-medium text-slate-800">{firstName} {lastName}</p></div><div><p className="text-xs font-bold text-slate-400 uppercase">Email</p><p className="font-medium text-slate-800">{email}</p></div><div><p className="text-xs font-bold text-slate-400 uppercase">Password</p><p className="font-mono text-slate-800 bg-white border border-slate-200 p-1 rounded inline-block">{password}</p></div><div><p className="text-xs font-bold text-slate-400 uppercase">Country</p><p className="font-medium text-slate-800">{country}</p></div></div><Button onClick={() => window.location.reload()}>Go to Dashboard</Button></div></div>; }
 
     return (
         <div className="min-h-screen bg-white flex flex-col justify-center p-6"><div className="w-full max-w-md mx-auto"><div className="text-center mb-8"><div className="w-16 h-16 bg-brand-600 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-brand-200"><BarChart2 className="text-white" size={32} /></div><h1 className="text-3xl font-bold text-slate-800">Loggr</h1><p className="text-slate-500">Daily productivity tracking</p></div>
@@ -289,6 +511,7 @@ const UserDashboard = ({ user }) => {
 
     React.useEffect(() => { localStorage.setItem(`loggr_draft_${user.uid}`, JSON.stringify(newTask)); }, [newTask, user]);
 
+    // Enhanced save to include position/dept context
     const saveTask = async () => {
         if (!newTask.task) return;
         const reportId = `${user.uid}_${selectedDate}`;
@@ -425,10 +648,10 @@ const AdminDashboard = ({ user }) => {
             message: emp.disabled ? "Enable this account? User will be able to log in again." : "Disable this account? User will not be able to log in.",
             isDangerous: !emp.disabled,
             onConfirm: async () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false })); // Close immediately
                 const updates = { disabled: !emp.disabled };
                 await setDoc(doc(db, "artifacts", APP_ID, "public", "data", "employees", emp.uid), updates, { merge: true });
                 await setDoc(doc(db, "artifacts", APP_ID, "users", emp.uid, "settings", "profile"), updates, { merge: true });
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
             }
         });
     };
@@ -440,10 +663,13 @@ const AdminDashboard = ({ user }) => {
             message: emp.archived ? "Restore this account from archive? User will appear in active lists." : "Archive this account? User will be hidden from main lists and disabled.",
             isDangerous: false,
             onConfirm: async () => {
-                const updates = { archived: !emp.archived, disabled: !emp.archived ? true : emp.disabled }; 
+                setConfirmModal(prev => ({ ...prev, isOpen: false })); // Close immediately
+                const updates = { 
+                    archived: !emp.archived, 
+                    disabled: !emp.archived ? true : false // If archiving, disable. If restoring, enable (active).
+                }; 
                 await setDoc(doc(db, "artifacts", APP_ID, "public", "data", "employees", emp.uid), updates, { merge: true });
                 await setDoc(doc(db, "artifacts", APP_ID, "users", emp.uid, "settings", "profile"), updates, { merge: true });
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
             }
         });
     };
@@ -455,9 +681,9 @@ const AdminDashboard = ({ user }) => {
             message: "PERMANENTLY DELETE user? This action cannot be undone and will remove all their profile data.",
             isDangerous: true,
             onConfirm: async () => {
+                setConfirmModal(prev => ({ ...prev, isOpen: false })); // Close immediately
                 await deleteDoc(doc(db, "artifacts", APP_ID, "public", "data", "employees", emp.uid));
                 await deleteDoc(doc(db, "artifacts", APP_ID, "users", emp.uid, "settings", "profile"));
-                setConfirmModal(prev => ({ ...prev, isOpen: false }));
             }
         });
     };
@@ -471,6 +697,12 @@ const AdminDashboard = ({ user }) => {
         const matchesDept = filterDept ? emp.department === filterDept : true;
         const matchesPos = filterPos ? emp.position === filterPos : true;
         return matchesSearch && matchesDept && matchesPos && statusMatch;
+    }).sort((a, b) => {
+        const deptCompare = (a.department || "").localeCompare(b.department || "");
+        if (deptCompare !== 0) return deptCompare;
+        const posCompare = (a.position || "").localeCompare(b.position || "");
+        if (posCompare !== 0) return posCompare;
+        return (a.userName || "").localeCompare(b.userName || "");
     });
     
     const handleExportOne = (report) => {
