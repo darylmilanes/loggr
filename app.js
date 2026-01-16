@@ -33,8 +33,8 @@ const COUNTRY_TIMEZONES = {
 };
 
 // --- Icons ---
-const IconWrapper = ({ children, size = 24, className = "", onClick }) => (
-    <svg onClick={onClick} xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+const IconWrapper = ({ children, size = 24, className = "", onClick, ...props }) => (
+    <svg onClick={onClick} {...props} xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
         {children}
     </svg>
 );
@@ -42,6 +42,7 @@ const IconWrapper = ({ children, size = 24, className = "", onClick }) => (
 const BarChart2 = (props) => <IconWrapper {...props}><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></IconWrapper>;
 const Plus = (props) => <IconWrapper {...props}><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></IconWrapper>;
 const Trash2 = (props) => <IconWrapper {...props}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></IconWrapper>;
+const GripVertical = (props) => <IconWrapper {...props}><circle cx="9" cy="12" r="1"></circle><circle cx="9" cy="5" r="1"></circle><circle cx="9" cy="19" r="1"></circle><circle cx="15" cy="12" r="1"></circle><circle cx="15" cy="5" r="1"></circle><circle cx="15" cy="19" r="1"></circle></IconWrapper>;
 const LogOut = (props) => <IconWrapper {...props}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></IconWrapper>;
 const Calendar = (props) => <IconWrapper {...props}><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></IconWrapper>;
 const CheckCircle = (props) => <IconWrapper {...props}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></IconWrapper>;
@@ -196,6 +197,132 @@ const CustomDatePicker = ({ selectedDate, onChange, onClose }) => {
 const DateStrip = ({ selectedDate, onSelect, timezone }) => {
     const dates = []; const today = new Date(); for(let i = -2; i <= 4; i++) { const d = new Date(today); d.setDate(today.getDate() + i); dates.push(d); } const todayStr = getTodayInTimezone(timezone);
     return <div className="flex gap-2 overflow-x-auto hide-scrollbar py-2 mb-4 -mx-4 px-4 bg-white border-b border-slate-100 sticky top-0 z-10">{dates.map((date, idx) => { const dateStr = formatDate(date); const isSelected = dateStr === selectedDate; const isToday = dateStr === todayStr; return <button key={idx} onClick={() => onSelect(dateStr)} className={`flex flex-col items-center justify-center min-w-[60px] p-2 rounded-xl transition-all border ${isSelected ? 'bg-brand-600 text-white border-brand-600 shadow-md' : 'bg-slate-50 text-slate-500 border-transparent'}`}><span className="text-xs font-medium uppercase">{date.toLocaleDateString('en-US', { weekday: 'short' })}</span><span className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-slate-800'}`}>{date.getDate()}</span>{isToday && <span className="text-[10px] mt-1 font-bold">Today</span>}</button> })}</div>;
+};
+
+// --- List Item (Swipe + DND) ---
+const SwipeableListItem = ({ item, index, view, onEdit, onDelete, onDragStart, onDragOver, onDrop }) => {
+    const [offsetX, setOffsetX] = React.useState(0);
+    const [isHandleActive, setIsHandleActive] = React.useState(false);
+    const startX = React.useRef(null);
+
+    // Unified Pointer Events (Mouse + Touch) for Swipe
+    const handlePointerDown = (e) => {
+        // If clicking the delete button (which is behind) or the handle, ignore swipe
+        if (isHandleActive) return;
+        
+        startX.current = e.clientX;
+        e.currentTarget.setPointerCapture(e.pointerId);
+    };
+
+    const handlePointerMove = (e) => {
+        if (startX.current === null) return;
+        
+        const currentX = e.clientX;
+        const diff = currentX - startX.current;
+
+        // Only allow swiping left (negative diff)
+        if (diff < 0) {
+            setOffsetX(Math.max(diff, -80)); // Limit to -80px (button width)
+        }
+    };
+
+    const handlePointerUp = (e) => {
+        if (startX.current === null) return;
+        
+        if (offsetX < -40) {
+            setOffsetX(-80); // Snap open
+        } else {
+            setOffsetX(0); // Snap close
+        }
+        
+        startX.current = null;
+        e.currentTarget.releasePointerCapture(e.pointerId);
+    };
+
+    // Only allow drag if handle is active
+    const handleDragStart = (e) => {
+        if (!isHandleActive) {
+            e.preventDefault();
+            return;
+        }
+        onDragStart(e, index);
+    };
+
+    return (
+        <div 
+            className="relative overflow-hidden mb-3 rounded-xl select-none"
+            onDragOver={(e) => onDragOver(e, index)}
+            onDrop={(e) => onDrop(e, index)}
+        >
+            {/* Delete Background */}
+            <div className="absolute inset-y-0 right-0 w-20 bg-red-500 flex items-center justify-center rounded-r-xl z-0">
+                <button 
+                    onClick={() => onDelete(view, item.id)} 
+                    className="text-white w-full h-full flex items-center justify-center active:bg-red-600"
+                >
+                    <Trash2 size={20} />
+                </button>
+            </div>
+
+            {/* Foreground Card */}
+            <div 
+                className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-3 relative z-10 transition-transform duration-200"
+                style={{ 
+                    transform: `translateX(${offsetX}px)`, 
+                    touchAction: 'pan-y' // Allow vertical scroll, handle horizontal in JS
+                }}
+                
+                // Pointer Events for Swipe
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerUp}
+                onPointerCancel={handlePointerUp}
+                
+                // Click to Edit
+                onClick={() => {
+                    if (offsetX < 0) setOffsetX(0); // Close if open
+                    else onEdit(item); // Edit if closed
+                }}
+                
+                // Drag and Drop (Reorder)
+                draggable={true} 
+                onDragStart={handleDragStart}
+            >
+                {/* Drag Handle */}
+                <div 
+                    className="text-slate-300 cursor-grab active:cursor-grabbing p-1 -ml-2" 
+                    onPointerDown={(e) => {
+                        setIsHandleActive(true);
+                        e.stopPropagation(); // Stop swipe from starting
+                    }}
+                    onPointerUp={() => setIsHandleActive(false)}
+                    onMouseLeave={() => setIsHandleActive(false)}
+                >
+                    <GripVertical size={20} />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 pointer-events-none">
+                     <div className="mt-1">
+                        {view === 'sod' ? ( 
+                            <div className="flex flex-col items-center min-w-[50px] bg-slate-50 rounded p-1">
+                                <span className="text-[10px] font-bold text-slate-500">{item.start}</span>
+                                <div className="w-px h-2 bg-slate-300 my-0.5"></div>
+                                <span className="text-[10px] font-bold text-slate-500">{item.end}</span>
+                            </div> 
+                        ) : ( 
+                            <div className="bg-green-50 text-green-700 text-xs font-bold px-2 py-1 rounded-md inline-block">
+                                {formatHours(item.minutes)}h
+                            </div> 
+                        )}
+                    </div>
+                </div>
+                <div className="flex-[3] pointer-events-none">
+                     <p className="text-slate-800 text-sm font-medium">{item.task}</p>
+                </div>
+            </div>
+        </div>
+    );
 };
 
 // --- Modals for Org Config & Profile ---
@@ -459,6 +586,9 @@ const UserDashboard = ({ user }) => {
     const [showToast, setShowToast] = React.useState(false);
     const [isMandatoryProfile, setIsMandatoryProfile] = React.useState(false);
     const [showWelcomeModal, setShowWelcomeModal] = React.useState(false);
+    const [editingItem, setEditingItem] = React.useState(null);
+    const [editForm, setEditForm] = React.useState({ task: "", minutes: "" });
+    const [draggedIndex, setDraggedIndex] = React.useState(null);
 
     React.useEffect(() => {
         const loadSettings = async () => {
@@ -524,7 +654,7 @@ const UserDashboard = ({ user }) => {
         if (view === 'sod') {
             const sodItem = { id: Date.now(), start: newTask.start, end: newTask.end, task: newTask.task };
             updatedReport.sod = [...(updatedReport.sod || []), sodItem];
-            updatedReport.sod.sort((a,b) => a.start.localeCompare(b.start));
+            // We removed simple sort to allow DND reordering
         } else {
             const eodItem = { id: Date.now(), task: newTask.task, minutes: newTask.minutes };
             updatedReport.eod = [...(updatedReport.eod || []), eodItem];
@@ -556,6 +686,57 @@ const UserDashboard = ({ user }) => {
         await setDoc(docRef, updatedReport, { merge: true });
     };
 
+    const confirmEdit = async () => {
+        if (!editingItem || !editForm.task || (view === 'eod' && !editForm.minutes)) return;
+        const reportId = `${user.uid}_${selectedDate}`;
+        const docRef = doc(db, "artifacts", APP_ID, "public", "data", "reports", reportId);
+        let updatedReport = { ...reportData };
+        if (view === 'sod') {
+             updatedReport.sod = updatedReport.sod.map(item => 
+                item.id === editingItem.id ? { ...item, task: editForm.task, start: editForm.start, end: editForm.end } : item
+            );
+        } else {
+             updatedReport.eod = updatedReport.eod.map(item => 
+                item.id === editingItem.id ? { ...item, task: editForm.task, minutes: editForm.minutes } : item
+            );
+        }
+        await setDoc(docRef, updatedReport, { merge: true });
+        setEditingItem(null);
+    };
+
+    const handleReorder = async (viewType, fromIndex, toIndex) => {
+        if (fromIndex === toIndex) return;
+        const reportId = `${user.uid}_${selectedDate}`;
+        const docRef = doc(db, "artifacts", APP_ID, "public", "data", "reports", reportId);
+        let items = [...(viewType === 'sod' ? (reportData.sod || []) : (reportData.eod || []))];
+        const [movedItem] = items.splice(fromIndex, 1);
+        items.splice(toIndex, 0, movedItem);
+
+        const updateData = viewType === 'sod' ? { sod: items } : { eod: items };
+        // Optimistically update local state to avoid jump
+        setReportData(prev => ({ ...prev, ...updateData }));
+        await setDoc(docRef, updateData, { merge: true });
+    };
+
+    const onDragStart = (e, index) => {
+        setDraggedIndex(index);
+        e.dataTransfer.effectAllowed = "move";
+        // Ghost element automatic by browser
+    };
+
+    const onDragOver = (e, index) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "move";
+    };
+
+    const onDrop = (e, dropIndex) => {
+        e.preventDefault();
+        if (draggedIndex !== null) {
+            handleReorder(view, draggedIndex, dropIndex);
+        }
+        setDraggedIndex(null);
+    };
+
     const handleExportCSV = () => {
         const rows = [["Date", "Type", "Time/Duration", "Task"]];
         (reportData.sod || []).forEach(i => rows.push([selectedDate, "SOD", `${i.start} - ${i.end}`, `"${i.task}"`]));
@@ -577,6 +758,8 @@ const UserDashboard = ({ user }) => {
     const isTaskDone = (sodTaskName) => { return (reportData.eod || []).some(e => e.task.toLowerCase() === sodTaskName.toLowerCase()); };
 
     if (!selectedDate) return <div className="h-screen flex items-center justify-center text-slate-400">Loading profile...</div>;
+
+    const currentList = view === 'sod' ? (reportData.sod || []) : (reportData.eod || []);
 
     return (
         <div className="pb-24">
@@ -600,7 +783,23 @@ const UserDashboard = ({ user }) => {
                         <div className="flex gap-2"><input type="text" placeholder={view === 'sod' ? "Task Name" : "Activity Description"} value={newTask.task} onChange={(e) => setNewTask({...newTask, task: e.target.value})} className="flex-1 p-2 bg-slate-50 rounded-lg text-sm border border-slate-200" onKeyDown={(e) => e.key === 'Enter' && saveTask()} /><button onClick={saveTask} disabled={!newTask.task || (view === 'eod' && !newTask.minutes)} className="bg-brand-600 text-white p-2 rounded-lg disabled:opacity-50"><Plus size={20}/></button></div>
                         {view === 'eod' && ( <div className="mt-4 border-t border-slate-100 pt-3"><p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Planned from Yesterday ({getPreviousDate(selectedDate)})</p>{prevReportData.sod && prevReportData.sod.length > 0 ? ( <div className="flex flex-wrap gap-2">{prevReportData.sod.map(item => { const done = isTaskDone(item.task); return ( <button key={item.id} onClick={() => !done && setLinkingTask(item)} disabled={done} className={`text-xs px-3 py-1.5 rounded-lg border transition-all text-left flex items-center gap-1 ${done ? 'bg-green-100 text-green-700 border-green-200 cursor-default' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-brand-50 hover:border-brand-200 hover:text-brand-600'}`}>{done && <CheckCircle size={10}/>} {item.task}</button> ) })}</div> ) : ( <div className="text-xs text-slate-400 italic">First Day? No pending plans found from yesterday. You can log completed activities directly above.</div> )}</div> )}
                     </div>
-                    <div className="space-y-3">{loading ? <div className="text-center py-10 text-slate-400">Loading tasks...</div> : (view === 'sod' ? reportData.sod : reportData.eod)?.length === 0 ? ( <div className="text-center py-10"><div className="inline-block p-4 rounded-full bg-slate-100 mb-2">{view === 'sod' ? <Calendar className="text-slate-400"/> : <CheckCircle className="text-slate-400"/>}</div><p className="text-slate-500 text-sm">No tasks logged yet.</p></div> ) : ( (view === 'sod' ? reportData.sod : reportData.eod)?.map((item, idx) => ( <div key={item.id} className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-start gap-3 group"><div className="mt-1">{view === 'sod' ? ( <div className="flex flex-col items-center min-w-[50px] bg-slate-50 rounded p-1"><span className="text-[10px] font-bold text-slate-500">{item.start}</span><div className="w-px h-2 bg-slate-300 my-0.5"></div><span className="text-[10px] font-bold text-slate-500">{item.end}</span></div> ) : ( <div className="bg-green-50 text-green-700 text-xs font-bold px-2 py-1 rounded-md">{formatHours(item.minutes)}h</div> )}</div><div className="flex-1"><p className="text-slate-800 text-sm font-medium">{item.task}</p></div><button onClick={() => deleteTask(view, item.id)} className="text-slate-300 hover:text-red-500 transition-colors p-1"><Trash2 size={16} /></button></div> )) )}</div>
+                    <div className="space-y-0">
+                        {loading ? <div className="text-center py-10 text-slate-400">Loading tasks...</div> : currentList.length === 0 ? ( <div className="text-center py-10"><div className="inline-block p-4 rounded-full bg-slate-100 mb-2">{view === 'sod' ? <Calendar className="text-slate-400"/> : <CheckCircle className="text-slate-400"/>}</div><p className="text-slate-500 text-sm">No tasks logged yet.</p></div> ) : ( 
+                            currentList.map((item, idx) => ( 
+                                <SwipeableListItem 
+                                    key={item.id} 
+                                    item={item} 
+                                    index={idx}
+                                    view={view}
+                                    onEdit={(i) => { setEditingItem(i); setEditForm({ task: i.task, minutes: i.minutes, start: i.start, end: i.end }); }}
+                                    onDelete={deleteTask}
+                                    onDragStart={onDragStart}
+                                    onDragOver={onDragOver}
+                                    onDrop={onDrop}
+                                /> 
+                            )) 
+                        )}
+                    </div>
                 </div>
             </div>
             <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 p-4 z-30"><div className="max-w-lg mx-auto flex flex-col gap-2">{view === 'eod' && userSettings?.workConfig?.enabled && ( <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-1"><div className={`h-full ${isWorkHoursMet ? 'bg-green-500' : 'bg-brand-500'}`} style={{ width: `${Math.min((totalLoggedHours / requiredHours) * 100, 100)}%` }}></div></div> )}{view === 'sod' ? ( <Button onClick={() => { setModalContent({ title: "Start Day Report", body: generateReport('SOD') }); setShowModal(true); }} disabled={(!reportData.sod || reportData.sod.length === 0)} className="shadow-lg shadow-brand-200">Start the Day</Button> ) : ( <Button onClick={handleEndDay} variant={isWorkHoursMet ? 'primary' : 'disabled'} disabled={!isWorkHoursMet} className="bg-slate-800 hover:bg-slate-900 shadow-lg shadow-slate-300">{isWorkHoursMet ? "End the Day" : `Finish ${formatHours((requiredHours * 60) - totalLoggedMinutes)}h more`}</Button> )}<button onClick={handleExportCSV} className="text-xs text-brand-600 font-medium py-2 hover:underline">Export to CSV</button></div></div>
@@ -611,6 +810,20 @@ const UserDashboard = ({ user }) => {
                     <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2"><UserIcon size={32} /></div>
                     <p className="text-slate-600">Please complete your profile setup (Department & Position) to start using Loggr.</p>
                     <Button onClick={() => { setShowWelcomeModal(false); setIsMandatoryProfile(true); setShowProfileModal(true); }}>Proceed to Setup</Button>
+                </div>
+            </Modal>
+            <Modal isOpen={!!editingItem} onClose={() => setEditingItem(null)} title="Edit Task">
+                <div className="space-y-4">
+                    <Input label="Task Description" value={editForm.task} onChange={e => setEditForm({...editForm, task: e.target.value})} />
+                    {view === 'eod' ? (
+                        <Input label="Duration (Minutes)" type="number" value={editForm.minutes} onChange={e => setEditForm({...editForm, minutes: e.target.value})} />
+                    ) : (
+                        <div className="grid grid-cols-2 gap-4">
+                            <div><label className="text-[10px] uppercase font-bold text-slate-400">Start</label><input type="time" className="w-full p-3 bg-slate-50 rounded-lg text-sm" value={editForm.start} onChange={e => setEditForm({...editForm, start: e.target.value})} /></div>
+                            <div><label className="text-[10px] uppercase font-bold text-slate-400">End</label><input type="time" className="w-full p-3 bg-slate-50 rounded-lg text-sm" value={editForm.end} onChange={e => setEditForm({...editForm, end: e.target.value})} /></div>
+                        </div>
+                    )}
+                    <Button onClick={confirmEdit}>Save Changes</Button>
                 </div>
             </Modal>
             <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} user={user} userSettings={userSettings} isMandatory={isMandatoryProfile} />
