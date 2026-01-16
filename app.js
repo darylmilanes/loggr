@@ -91,6 +91,26 @@ const TIME_OPTIONS = generateTimeOptions();
 const formatHours = (mins) => { const hours = parseFloat(mins) / 60; return Number(hours.toFixed(1)); };
 const downloadCSV = (data, filename) => { const csvContent = "data:text/csv;charset=utf-8," + data.map(e => e.join(",")).join("\n"); const encodedUri = encodeURI(csvContent); const link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", filename); document.body.appendChild(link); link.click(); document.body.removeChild(link); };
 
+// Add Minutes to Time String Helper
+const addMinutesToTime = (timeStr, minsToAdd) => {
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    const date = new Date();
+    date.setHours(hours);
+    date.setMinutes(minutes + parseInt(minsToAdd || 0));
+    return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
+};
+
+// Calculate Schedule for SOD
+const calculateSodSchedule = (items, startTime) => {
+    let currentTime = startTime;
+    return items.map(item => {
+        const start = currentTime;
+        const end = addMinutesToTime(currentTime, item.minutes || 0);
+        currentTime = end;
+        return { ...item, start, end };
+    });
+};
+
 // --- Components ---
 const Toast = ({ message, show, onClose }) => {
     React.useEffect(() => { if (show) { const timer = setTimeout(onClose, 2000); return () => clearTimeout(timer); } }, [show, onClose]);
@@ -572,7 +592,7 @@ const AuthScreen = ({ onLogin }) => {
 const UserDashboard = ({ user }) => {
     const [selectedDate, setSelectedDate] = React.useState(null); 
     const [view, setView] = React.useState('eod'); 
-    const [reportData, setReportData] = React.useState({ sod: [], eod: [] }); 
+    const [reportData, setReportData] = React.useState({ sod: [], eod: [], sodConfig: { start: "09:00", end: "17:00" } }); 
     const [prevReportData, setPrevReportData] = React.useState({ sod: [], eod: [] });
     const [loading, setLoading] = React.useState(true);
     const [userSettings, setUserSettings] = React.useState(null);
@@ -589,6 +609,7 @@ const UserDashboard = ({ user }) => {
     const [editingItem, setEditingItem] = React.useState(null);
     const [editForm, setEditForm] = React.useState({ task: "", minutes: "" });
     const [draggedIndex, setDraggedIndex] = React.useState(null);
+    const [sodConfig, setSodConfig] = React.useState({ start: "09:00", end: "17:00" });
 
     React.useEffect(() => {
         const loadSettings = async () => {
@@ -597,6 +618,11 @@ const UserDashboard = ({ user }) => {
                 const data = snap.data();
                 setUserSettings(data);
                 
+                // Set default SOD config from profile
+                if (data.workConfig?.enabled) {
+                    setSodConfig({ start: data.workConfig.start, end: data.workConfig.end });
+                }
+
                 // CHECK IF PROFILE IS INCOMPLETE (Mandatory Setup)
                 if (!data.position || !data.department || data.position === "N/A" || data.department === "N/A") {
                     setShowWelcomeModal(true);
@@ -629,6 +655,7 @@ const UserDashboard = ({ user }) => {
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 setReportData(data);
+                if(data.sodConfig) setSodConfig(data.sodConfig);
                 if (userSettings?.department && (!data.department || data.department === "N/A")) {
                     setDoc(docRef, { department: userSettings.department, position: userSettings.position, country: userSettings.country, timezone: userSettings.timezone }, { merge: true });
                 }
@@ -651,10 +678,12 @@ const UserDashboard = ({ user }) => {
         updatedReport.country = userSettings?.country || "Unknown"; updatedReport.timezone = userSettings?.timezone || "UTC";
         updatedReport.position = userSettings?.position || "N/A"; updatedReport.department = userSettings?.department || "N/A";
         
+        // Save SOD Config
+        if(view === 'sod') updatedReport.sodConfig = sodConfig;
+
         if (view === 'sod') {
-            const sodItem = { id: Date.now(), start: newTask.start, end: newTask.end, task: newTask.task };
+            const sodItem = { id: Date.now(), task: newTask.task, minutes: newTask.minutes };
             updatedReport.sod = [...(updatedReport.sod || []), sodItem];
-            // We removed simple sort to allow DND reordering
         } else {
             const eodItem = { id: Date.now(), task: newTask.task, minutes: newTask.minutes };
             updatedReport.eod = [...(updatedReport.eod || []), eodItem];
@@ -687,13 +716,13 @@ const UserDashboard = ({ user }) => {
     };
 
     const confirmEdit = async () => {
-        if (!editingItem || !editForm.task || (view === 'eod' && !editForm.minutes)) return;
+        if (!editingItem || !editForm.task || !editForm.minutes) return;
         const reportId = `${user.uid}_${selectedDate}`;
         const docRef = doc(db, "artifacts", APP_ID, "public", "data", "reports", reportId);
         let updatedReport = { ...reportData };
         if (view === 'sod') {
              updatedReport.sod = updatedReport.sod.map(item => 
-                item.id === editingItem.id ? { ...item, task: editForm.task, start: editForm.start, end: editForm.end } : item
+                item.id === editingItem.id ? { ...item, task: editForm.task, minutes: editForm.minutes } : item
             );
         } else {
              updatedReport.eod = updatedReport.eod.map(item => 
@@ -739,14 +768,23 @@ const UserDashboard = ({ user }) => {
 
     const handleExportCSV = () => {
         const rows = [["Date", "Type", "Time/Duration", "Task"]];
-        (reportData.sod || []).forEach(i => rows.push([selectedDate, "SOD", `${i.start} - ${i.end}`, `"${i.task}"`]));
+        const calculatedSod = calculateSodSchedule(reportData.sod || [], sodConfig.start);
+        calculatedSod.forEach(i => rows.push([selectedDate, "SOD", `${i.start} - ${i.end}`, `"${i.task}"`]));
         (reportData.eod || []).forEach(i => rows.push([selectedDate, "EOD", `${i.minutes} mins`, `"${i.task}"`]));
         downloadCSV(rows, `Loggr_Report_${selectedDate}.csv`);
     };
 
     const generateReport = (type) => {
         let text = ""; const headerDate = getDisplayDate(selectedDate);
-        if (type === 'SOD') { text = `🚀 SOD Report - ${headerDate}\n\nTasks for Next Working Day:\n`; if (!reportData.sod || reportData.sod.length === 0) text += "No tasks assigned yet."; else reportData.sod.forEach(item => { text += `• ${item.start} - ${item.end}: ${item.task}\n`; }); } 
+        if (type === 'SOD') { 
+            text = `🚀 SOD Report - ${headerDate}\n\nTasks for Next Working Day:\n`; 
+            if (!reportData.sod || reportData.sod.length === 0) text += "No tasks assigned yet."; 
+            else {
+                // Calculate Times just for display
+                const itemsWithTimes = calculateSodSchedule(reportData.sod, sodConfig.start);
+                itemsWithTimes.forEach(item => { text += `• ${item.start} - ${item.end}: ${item.task}\n`; }); 
+            }
+        } 
         else { text = `✅ EOD Report - ${headerDate}\n\nCompleted Today:\n`; if (!reportData.eod || reportData.eod.length === 0) text += "No completion logged."; else { let totalMins = 0; reportData.eod.forEach(item => { text += `• ${item.task} (${formatHours(item.minutes)}h)\n`; totalMins += parseFloat(item.minutes || 0); }); text += `\nTotal Hours: ${formatHours(totalMins)}h`; } }
         return text;
     };
@@ -759,7 +797,18 @@ const UserDashboard = ({ user }) => {
 
     if (!selectedDate) return <div className="h-screen flex items-center justify-center text-slate-400">Loading profile...</div>;
 
-    const currentList = view === 'sod' ? (reportData.sod || []) : (reportData.eod || []);
+    // Computed Lists
+    const currentList = view === 'sod' 
+        ? calculateSodSchedule(reportData.sod || [], sodConfig.start) // Compute times on the fly for render
+        : (reportData.eod || []);
+
+    // SOD Calculation for Progress Bar
+    const totalSodMins = (reportData.sod || []).reduce((acc, curr) => acc + parseFloat(curr.minutes || 0), 0);
+    const startD = new Date(`1970-01-01T${sodConfig.start}`);
+    const endD = new Date(`1970-01-01T${sodConfig.end}`);
+    const totalAvailableMins = (endD - startD) / 60000;
+    const remainingMins = totalAvailableMins - totalSodMins;
+    const remainingHours = (remainingMins / 60).toFixed(1);
 
     return (
         <div className="pb-44">
@@ -779,8 +828,34 @@ const UserDashboard = ({ user }) => {
                 <div className="space-y-6 fade-in">
                     <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
                         <h3 className="font-bold text-slate-700 mb-3 flex items-center gap-2"><Plus size={18} className="text-brand-500"/> {view === 'sod' ? 'Plan for Next Working Day' : 'Log Today\'s Activity'}</h3>
-                        {view === 'sod' ? ( <div className="grid grid-cols-2 gap-2 mb-3"><datalist id="time-options">{TIME_OPTIONS.map(t => <option key={t} value={t} />)}</datalist><div><label className="text-[10px] uppercase font-bold text-slate-400">Start</label><input list="time-options" className="w-full p-2 bg-slate-50 rounded-lg border-transparent text-sm" value={newTask.start} onChange={(e) => setNewTask({...newTask, start: e.target.value})} /></div><div><label className="text-[10px] uppercase font-bold text-slate-400">End</label><input list="time-options" className="w-full p-2 bg-slate-50 rounded-lg border-transparent text-sm" value={newTask.end} onChange={(e) => setNewTask({...newTask, end: e.target.value})} /></div></div> ) : ( <div className="mb-3"><label className="text-[10px] uppercase font-bold text-slate-400">Duration (Minutes)</label><input type="number" value={newTask.minutes} onChange={(e) => setNewTask({...newTask, minutes: e.target.value})} className="w-full p-2 bg-slate-50 rounded-lg text-sm" placeholder="e.g. 45" /></div> )}
-                        <div className="flex gap-2"><input type="text" placeholder={view === 'sod' ? "Task Name" : "Activity Description"} value={newTask.task} onChange={(e) => setNewTask({...newTask, task: e.target.value})} className="flex-1 p-2 bg-slate-50 rounded-lg text-sm border border-slate-200" onKeyDown={(e) => e.key === 'Enter' && saveTask()} /><button onClick={saveTask} disabled={!newTask.task || (view === 'eod' && !newTask.minutes)} className="bg-brand-600 text-white p-2 rounded-lg disabled:opacity-50"><Plus size={20}/></button></div>
+                        
+                        {view === 'sod' && (
+                            <div className="bg-slate-50 p-3 rounded-xl mb-3 border border-slate-100">
+                                <div className="grid grid-cols-2 gap-3 mb-2">
+                                    <div>
+                                        <label className="text-[10px] uppercase font-bold text-slate-400">Day Start</label>
+                                        <input type="time" className="w-full bg-white p-1 rounded border border-slate-200 text-sm" value={sodConfig.start} onChange={e => { const n = {...sodConfig, start: e.target.value}; setSodConfig(n); setDoc(doc(db, "artifacts", APP_ID, "public", "data", "reports", `${user.uid}_${selectedDate}`), { sodConfig: n }, { merge: true }); }} />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] uppercase font-bold text-slate-400">Day End</label>
+                                        <input type="time" className="w-full bg-white p-1 rounded border border-slate-200 text-sm" value={sodConfig.end} onChange={e => { const n = {...sodConfig, end: e.target.value}; setSodConfig(n); setDoc(doc(db, "artifacts", APP_ID, "public", "data", "reports", `${user.uid}_${selectedDate}`), { sodConfig: n }, { merge: true }); }} />
+                                    </div>
+                                </div>
+                                <div className="flex justify-between items-center text-xs">
+                                    <span className={remainingMins < 0 ? "text-red-500 font-bold" : "text-slate-500"}>
+                                        {remainingMins < 0 ? `${Math.abs(remainingHours)}h Overbooked` : `${remainingHours}h Remaining`}
+                                    </span>
+                                    <span className="text-slate-400">{formatHours(totalSodMins)}h Scheduled</span>
+                                </div>
+                                <div className="w-full bg-slate-200 h-1.5 rounded-full mt-1 overflow-hidden">
+                                    <div className={`h-full ${remainingMins < 0 ? 'bg-red-500' : 'bg-brand-500'}`} style={{ width: `${Math.min((totalSodMins / totalAvailableMins) * 100, 100)}%` }}></div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="mb-3"><label className="text-[10px] uppercase font-bold text-slate-400">Duration (Minutes)</label><input type="number" value={newTask.minutes} onChange={(e) => setNewTask({...newTask, minutes: e.target.value})} className="w-full p-2 bg-slate-50 rounded-lg text-sm" placeholder="e.g. 60" /></div>
+                        
+                        <div className="flex gap-2"><input type="text" placeholder={view === 'sod' ? "Task Name" : "Activity Description"} value={newTask.task} onChange={(e) => setNewTask({...newTask, task: e.target.value})} className="flex-1 p-2 bg-slate-50 rounded-lg text-sm border border-slate-200" onKeyDown={(e) => e.key === 'Enter' && saveTask()} /><button onClick={saveTask} disabled={!newTask.task || !newTask.minutes} className="bg-brand-600 text-white p-2 rounded-lg disabled:opacity-50"><Plus size={20}/></button></div>
                         {view === 'eod' && ( <div className="mt-4 border-t border-slate-100 pt-3"><p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Planned from Yesterday ({getPreviousDate(selectedDate)})</p>{prevReportData.sod && prevReportData.sod.length > 0 ? ( <div className="flex flex-wrap gap-2">{prevReportData.sod.map(item => { const done = isTaskDone(item.task); return ( <button key={item.id} onClick={() => !done && setLinkingTask(item)} disabled={done} className={`text-xs px-3 py-1.5 rounded-lg border transition-all text-left flex items-center gap-1 ${done ? 'bg-green-100 text-green-700 border-green-200 cursor-default' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-brand-50 hover:border-brand-200 hover:text-brand-600'}`}>{done && <CheckCircle size={10}/>} {item.task}</button> ) })}</div> ) : ( <div className="text-xs text-slate-400 italic">First Day? No pending plans found from yesterday. You can log completed activities directly above.</div> )}</div> )}
                     </div>
                     <div className="space-y-3">
@@ -791,7 +866,7 @@ const UserDashboard = ({ user }) => {
                                     item={item} 
                                     index={idx}
                                     view={view}
-                                    onEdit={(i) => { setEditingItem(i); setEditForm({ task: i.task, minutes: i.minutes, start: i.start, end: i.end }); }}
+                                    onEdit={(i) => { setEditingItem(i); setEditForm({ task: i.task, minutes: i.minutes }); }}
                                     onDelete={deleteTask}
                                     onDragStart={onDragStart}
                                     onDragOver={onDragOver}
@@ -815,14 +890,7 @@ const UserDashboard = ({ user }) => {
             <Modal isOpen={!!editingItem} onClose={() => setEditingItem(null)} title="Edit Task">
                 <div className="space-y-4">
                     <Input label="Task Description" value={editForm.task} onChange={e => setEditForm({...editForm, task: e.target.value})} />
-                    {view === 'eod' ? (
-                        <Input label="Duration (Minutes)" type="number" value={editForm.minutes} onChange={e => setEditForm({...editForm, minutes: e.target.value})} />
-                    ) : (
-                        <div className="grid grid-cols-2 gap-4">
-                            <div><label className="text-[10px] uppercase font-bold text-slate-400">Start</label><input type="time" className="w-full p-3 bg-slate-50 rounded-lg text-sm" value={editForm.start} onChange={e => setEditForm({...editForm, start: e.target.value})} /></div>
-                            <div><label className="text-[10px] uppercase font-bold text-slate-400">End</label><input type="time" className="w-full p-3 bg-slate-50 rounded-lg text-sm" value={editForm.end} onChange={e => setEditForm({...editForm, end: e.target.value})} /></div>
-                        </div>
-                    )}
+                    <Input label="Duration (Minutes)" type="number" value={editForm.minutes} onChange={e => setEditForm({...editForm, minutes: e.target.value})} />
                     <Button onClick={confirmEdit}>Save Changes</Button>
                 </div>
             </Modal>
