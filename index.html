@@ -5,20 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Loggr</title>
     
-    <!-- React & ReactDOM -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><rect width=%2224%22 height=%2224%22 rx=%226%22 fill=%22%230284c7%22/><line x1=%2218%22 y1=%2220%22 x2=%2218%22 y2=%2210%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/><line x1=%2212%22 y1=%2220%22 x2=%2212%22 y2=%224%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/><line x1=%226%22 y1=%2220%22 x2=%226%22 y2=%2214%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
+
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     
-    <!-- Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- External CSS -->
     <link rel="stylesheet" href="styles.css">
     
-    <!-- Tailwind Config -->
     <script>
         tailwind.config = {
             theme: {
@@ -43,8 +40,6 @@
 <body>
     <div id="root"></div>
 
-    <!-- Main Logic -->
-    <!-- Note: You must run this via Live Server (VS Code Extension) to avoid CORS errors -->
-    <script src="app.js" type="text/babel" data-type="module"></script>
+    <script type="text/babel" data-type="module" src="app.js"></script>
 </body>
 </html>
