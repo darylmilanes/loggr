@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Loggr</title>
     
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><rect width=%2224%22 height=%2224%22 rx=%226%22 fill=%22%230284c7%22/><line x1=%2218%22 y1=%2220%22 x2=%2218%22 y2=%2210%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/><line x1=%2212%22 y1=%2220%22 x2=%2212%22 y2=%224%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/><line x1=%226%22 y1=%2220%22 x2=%226%22 y2=%2214%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><rect width=%2224%22 height=%2224%22 rx=%226%22 fill=%22%23990302%22/><line x1=%2218%22 y1=%2220%22 x2=%2218%22 y2=%2210%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/><line x1=%2212%22 y1=%2220%22 x2=%2212%22 y2=%224%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/><line x1=%226%22 y1=%2220%22 x2=%226%22 y2=%2214%22 stroke=%22white%22 stroke-width=%222%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/></svg>">
 
     <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
@@ -22,11 +22,26 @@
                 extend: {
                     colors: {
                         brand: {
-                            50: '#f0f9ff',
-                            100: '#e0f2fe',
-                            500: '#0ea5e9',
-                            600: '#0284c7',
-                            900: '#0c4a6e',
+                            50: '#fdf2f2',
+                            100: '#fce7e7',
+                            200: '#D8C9AE', /* Tan Accent */
+                            300: '#D8C9AE', 
+                            500: '#b91c1c',
+                            600: '#990302', /* Deep Red Primary */
+                            700: '#7f1d1d',
+                            900: '#450a0a',
+                        },
+                        slate: {
+                            50: '#fbf9f8', 
+                            100: '#EBE2E0', /* Light Background */
+                            200: '#D8C9AE', /* Tan Borders */
+                            300: '#d1cdc7',
+                            400: '#9ca3af',
+                            500: '#6b7280',
+                            600: '#575757', /* Dark Gray Text */
+                            700: '#575757',
+                            800: '#404040',
+                            900: '#262626',
                         }
                     },
                     fontFamily: {
