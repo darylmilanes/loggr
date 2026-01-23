@@ -100,9 +100,9 @@ const addMinutesToTime = (timeStr, minsToAdd) => {
     return date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
 };
 
-// Calculate Schedule for SOD
-const calculateSodSchedule = (items, startTime) => {
-    let currentTime = startTime;
+// Calculate Schedule (Generic)
+const calculateSchedule = (items, startTime) => {
+    let currentTime = startTime || "09:00";
     return items.map(item => {
         const start = currentTime;
         const end = addMinutesToTime(currentTime, item.minutes || 0);
@@ -119,23 +119,23 @@ const Toast = ({ message, show, onClose }) => {
 };
 
 const Button = ({ children, onClick, variant = 'primary', className = '', disabled = false }) => {
-    const baseStyle = "w-full py-3 rounded-lg font-medium transition-all active:scale-95 flex items-center justify-center gap-2";
+    const baseStyle = "w-full py-3 rounded-lg font-medium transition-all active:scale-95 flex items-center justify-center gap-2 text-base";
     const variants = { primary: "bg-brand-600 text-white hover:bg-brand-700 shadow-md shadow-brand-200", secondary: "bg-white text-slate-700 border border-slate-200 hover:bg-slate-50", danger: "bg-red-50 text-red-600 hover:bg-red-100", ghost: "text-brand-600 hover:bg-brand-50", disabled: "bg-slate-200 text-slate-400 cursor-not-allowed" };
     return <button onClick={onClick} disabled={disabled} className={`${baseStyle} ${disabled ? variants.disabled : variants[variant]} ${className}`}>{children}</button>;
 };
 
 const Input = ({ label, value, onChange, placeholder, type = "text", error, list, className = "" }) => (
     <div className={`mb-4 ${className}`}>
-        {label && <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>}
-        <input type={type} value={value} onChange={onChange} placeholder={placeholder} list={list} className={`w-full p-3 rounded-lg bg-white border ${error ? 'border-red-500' : 'border-slate-200'} focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all`} />
+        {label && <label className="block text-sm font-bold text-slate-700 mb-1">{label}</label>}
+        <input type={type} value={value} onChange={onChange} placeholder={placeholder} list={list} className={`w-full p-3 rounded-lg bg-white border ${error ? 'border-red-500' : 'border-slate-200'} text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all placeholder:text-slate-400`} />
         {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
     </div>
 );
 
 const Select = ({ label, value, onChange, options, error, placeholder = "Select an option" }) => (
     <div className="mb-4">
-        {label && <label className="block text-sm font-medium text-slate-600 mb-1">{label}</label>}
-        <select value={value} onChange={onChange} className={`w-full p-3 rounded-lg bg-white border ${error ? 'border-red-500' : 'border-slate-200'} focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all`}>
+        {label && <label className="block text-sm font-bold text-slate-700 mb-1">{label}</label>}
+        <select value={value} onChange={onChange} className={`w-full p-3 rounded-lg bg-white border ${error ? 'border-red-500' : 'border-slate-200'} text-base text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500 transition-all`}>
             <option value="">{placeholder}</option>
             {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
@@ -158,18 +158,18 @@ const SearchableSelect = ({ value, onChange, options, placeholder }) => {
 
     return (
         <div className="relative w-full" ref={wrapperRef}>
-            <div className="w-full p-2 bg-slate-800 text-white text-sm rounded-lg border-none flex justify-between items-center cursor-pointer h-[38px]" onClick={() => setIsOpen(!isOpen)}>
+            <div className="w-full p-3 bg-slate-800 text-white text-base rounded-lg border-none flex justify-between items-center cursor-pointer min-h-[48px]" onClick={() => setIsOpen(!isOpen)}>
                 <span className={`truncate ${!value ? "text-slate-400" : ""}`}>{value || placeholder}</span>
-                <ChevronDown size={14} className="ml-2 text-slate-400 flex-shrink-0" />
+                <ChevronDown size={18} className="ml-2 text-slate-400 flex-shrink-0" />
             </div>
             {isOpen && (
                 <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg shadow-xl z-50 overflow-hidden border border-slate-200">
-                    <input type="text" className="w-full p-2 text-sm border-b border-slate-100 focus:outline-none text-slate-800" placeholder="Type to search..." value={search} onChange={(e) => setSearch(e.target.value)} autoFocus onClick={(e) => e.stopPropagation()} />
-                    <div className="max-h-40 overflow-y-auto">
-                        <div className="p-2 text-sm text-slate-600 hover:bg-brand-50 cursor-pointer" onClick={() => { onChange(""); setIsOpen(false); setSearch(""); }}>All Positions</div>
+                    <input type="text" className="w-full p-3 text-base border-b border-slate-100 focus:outline-none text-slate-800" placeholder="Type to search..." value={search} onChange={(e) => setSearch(e.target.value)} autoFocus onClick={(e) => e.stopPropagation()} />
+                    <div className="max-h-60 overflow-y-auto">
+                        <div className="p-3 text-base text-slate-600 hover:bg-brand-50 cursor-pointer" onClick={() => { onChange(""); setIsOpen(false); setSearch(""); }}>All Positions</div>
                         {filteredOptions.length > 0 ? filteredOptions.map(opt => (
-                            <div key={opt.value} className="p-2 text-sm text-slate-800 hover:bg-brand-50 cursor-pointer" onClick={() => { onChange(opt.value); setIsOpen(false); setSearch(""); }}>{opt.label}</div>
-                        )) : <div className="p-2 text-xs text-slate-400 italic">No matches found</div>}
+                            <div key={opt.value} className="p-3 text-base text-slate-800 hover:bg-brand-50 cursor-pointer" onClick={() => { onChange(opt.value); setIsOpen(false); setSearch(""); }}>{opt.label}</div>
+                        )) : <div className="p-3 text-sm text-slate-400 italic">No matches found</div>}
                     </div>
                 </div>
             )}
@@ -214,11 +214,6 @@ const CustomDatePicker = ({ selectedDate, onChange, onClose }) => {
     return <div className="p-2"><div className="flex justify-between items-center mb-4"><button onClick={() => { const d = new Date(viewDate); d.setMonth(d.getMonth() - 1); setViewDate(d); }} className="p-1 hover:bg-slate-100 rounded"><ChevronLeft size={20}/></button><span className="font-bold text-slate-700">{monthNames[currentMonth]} {currentYear}</span><button onClick={() => { const d = new Date(viewDate); d.setMonth(d.getMonth() + 1); setViewDate(d); }} className="p-1 hover:bg-slate-100 rounded"><ChevronRight size={20}/></button></div><div className="grid grid-cols-7 gap-1 text-center mb-2">{weekDays.map(d => <span key={d} className="text-xs font-bold text-slate-400">{d}</span>)}</div><div className="grid grid-cols-7 gap-1">{Array.from({ length: startDay }).map((_, i) => <div key={`empty-${i}`} />)}{Array.from({ length: days }).map((_, i) => { const day = i + 1; const isSelected = selectedDate.endsWith(`${(currentMonth+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`); return <button key={day} onClick={() => handleDayClick(day)} className={`h-8 w-8 rounded-full text-sm flex items-center justify-center hover:bg-brand-100 ${isSelected ? 'bg-brand-600 text-white' : 'text-slate-700'}`}>{day}</button> })}</div></div>;
 };
 
-const DateStrip = ({ selectedDate, onSelect, timezone }) => {
-    const dates = []; const today = new Date(); for(let i = -2; i <= 4; i++) { const d = new Date(today); d.setDate(today.getDate() + i); dates.push(d); } const todayStr = getTodayInTimezone(timezone);
-    return <div className="flex gap-2 overflow-x-auto hide-scrollbar py-2 mb-4 -mx-4 px-4 bg-white border-b border-slate-100 sticky top-0 z-10">{dates.map((date, idx) => { const dateStr = formatDate(date); const isSelected = dateStr === selectedDate; const isToday = dateStr === todayStr; return <button key={idx} onClick={() => onSelect(dateStr)} className={`flex flex-col items-center justify-center min-w-[60px] p-2 rounded-xl transition-all border ${isSelected ? 'bg-brand-600 text-white border-brand-600 shadow-md' : 'bg-slate-50 text-slate-500 border-transparent'}`}><span className="text-xs font-medium uppercase">{date.toLocaleDateString('en-US', { weekday: 'short' })}</span><span className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-slate-800'}`}>{date.getDate()}</span>{isToday && <span className="text-[10px] mt-1 font-bold">Today</span>}</button> })}</div>;
-};
-
 // --- List Item (Swipe + DND) ---
 const SwipeableListItem = ({ item, index, view, onEdit, onDelete, onDragStart, onDragOver, onDrop }) => {
     const [offsetX, setOffsetX] = React.useState(0);
@@ -227,39 +222,31 @@ const SwipeableListItem = ({ item, index, view, onEdit, onDelete, onDragStart, o
 
     // Unified Pointer Events (Mouse + Touch) for Swipe
     const handlePointerDown = (e) => {
-        // If clicking the delete button (which is behind) or the handle, ignore swipe
         if (isHandleActive) return;
-        
         startX.current = e.clientX;
         e.currentTarget.setPointerCapture(e.pointerId);
     };
 
     const handlePointerMove = (e) => {
         if (startX.current === null) return;
-        
         const currentX = e.clientX;
         const diff = currentX - startX.current;
-
-        // Only allow swiping left (negative diff)
         if (diff < 0) {
-            setOffsetX(Math.max(diff, -80)); // Limit to -80px (button width)
+            setOffsetX(Math.max(diff, -80));
         }
     };
 
     const handlePointerUp = (e) => {
         if (startX.current === null) return;
-        
         if (offsetX < -40) {
-            setOffsetX(-80); // Snap open
+            setOffsetX(-80);
         } else {
-            setOffsetX(0); // Snap close
+            setOffsetX(0);
         }
-        
         startX.current = null;
         e.currentTarget.releasePointerCapture(e.pointerId);
     };
 
-    // Only allow drag if handle is active
     const handleDragStart = (e) => {
         if (!isHandleActive) {
             e.preventDefault();
@@ -274,72 +261,145 @@ const SwipeableListItem = ({ item, index, view, onEdit, onDelete, onDragStart, o
             onDragOver={(e) => onDragOver(e, index)}
             onDrop={(e) => onDrop(e, index)}
         >
-            {/* Delete Background */}
             <div className="absolute inset-y-0 right-0 w-20 bg-red-500 flex items-center justify-center rounded-r-xl z-0">
-                <button 
-                    onClick={() => onDelete(view, item.id)} 
-                    className="text-white w-full h-full flex items-center justify-center active:bg-red-600"
-                >
-                    <Trash2 size={20} />
-                </button>
+                <button onClick={() => onDelete(view, item.id)} className="text-white w-full h-full flex items-center justify-center active:bg-red-600"><Trash2 size={24} /></button>
             </div>
 
-            {/* Foreground Card */}
             <div 
-                className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-3 relative z-10 transition-transform duration-200"
-                style={{ 
-                    transform: `translateX(${offsetX}px)`, 
-                    touchAction: 'pan-y' // Allow vertical scroll, handle horizontal in JS
-                }}
-                
-                // Pointer Events for Swipe
+                className="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4 relative z-10 transition-transform duration-200"
+                style={{ transform: `translateX(${offsetX}px)`, touchAction: 'pan-y' }}
                 onPointerDown={handlePointerDown}
                 onPointerMove={handlePointerMove}
                 onPointerUp={handlePointerUp}
                 onPointerCancel={handlePointerUp}
-                
-                // Click to Edit
-                onClick={() => {
-                    if (offsetX < 0) setOffsetX(0); // Close if open
-                    else onEdit(item); // Edit if closed
-                }}
-                
-                // Drag and Drop (Reorder)
+                onClick={() => { if (offsetX < 0) setOffsetX(0); else onEdit(item); }}
                 draggable={true} 
                 onDragStart={handleDragStart}
             >
-                {/* Drag Handle */}
                 <div 
-                    className="text-slate-300 cursor-grab active:cursor-grabbing p-1 -ml-2" 
-                    onPointerDown={(e) => {
-                        setIsHandleActive(true);
-                        e.stopPropagation(); // Stop swipe from starting
-                    }}
+                    className="text-slate-300 cursor-grab active:cursor-grabbing p-2 -ml-2 hover:text-slate-500" 
+                    onPointerDown={(e) => { setIsHandleActive(true); e.stopPropagation(); }}
                     onPointerUp={() => setIsHandleActive(false)}
                     onMouseLeave={() => setIsHandleActive(false)}
                 >
-                    <GripVertical size={20} />
+                    <GripVertical size={24} />
                 </div>
 
-                {/* Content */}
-                <div className="flex-1 pointer-events-none">
-                     <div className="mt-1">
-                        {view === 'sod' ? ( 
-                            <div className="flex flex-col items-center min-w-[50px] bg-slate-50 rounded p-1">
-                                <span className="text-[10px] font-bold text-slate-500">{item.start}</span>
-                                <div className="w-px h-2 bg-slate-300 my-0.5"></div>
-                                <span className="text-[10px] font-bold text-slate-500">{item.end}</span>
-                            </div> 
-                        ) : ( 
-                            <div className="bg-green-50 text-green-700 text-xs font-bold px-2 py-1 rounded-md inline-block">
-                                {formatHours(item.minutes)}h
-                            </div> 
-                        )}
+                <div className="flex-1 pointer-events-none flex flex-col justify-center">
+                    <div className="flex justify-between items-center mb-1.5">
+                         <div className="flex items-center gap-2">
+                            <span className="text-sm font-bold text-slate-600 bg-slate-100 px-2 py-1 rounded-md">{item.start} - {item.end}</span>
+                            <span className="text-sm font-bold text-brand-700 bg-brand-50 px-2 py-1 rounded-md">{formatHours(item.minutes)}h</span>
+                         </div>
+                    </div>
+                    <p className="text-slate-900 text-base font-semibold leading-snug">{item.task}</p>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- Task Panel Component (Reusable for SOD/EOD) ---
+const TaskPanel = ({ title, viewType, items, sodConfig, onSave, onDelete, onEdit, onReorder, linkageItems, onLink }) => {
+    const [task, setTask] = React.useState("");
+    const [minutes, setMinutes] = React.useState("");
+    
+    // Calculate schedule for display
+    const scheduledItems = calculateSchedule(items, sodConfig.start);
+    
+    // Logic for Progress Bar (SOD only)
+    const totalMins = items.reduce((acc, curr) => acc + parseFloat(curr.minutes || 0), 0);
+    const startD = new Date(`1970-01-01T${sodConfig.start}`);
+    const endD = new Date(`1970-01-01T${sodConfig.end}`);
+    const totalAvailableMins = (endD - startD) / 60000;
+    const remainingMins = totalAvailableMins - totalMins;
+    const remainingHours = (remainingMins / 60).toFixed(1);
+
+    const handleSave = () => {
+        if(!task || !minutes) return;
+        onSave(task, minutes, viewType);
+        setTask("");
+        setMinutes("");
+    };
+
+    // DND Handlers
+    const [draggedIndex, setDraggedIndex] = React.useState(null);
+    const onDragStart = (e, index) => { setDraggedIndex(index); e.dataTransfer.effectAllowed = "move"; };
+    const onDragOver = (e, index) => { e.preventDefault(); e.dataTransfer.dropEffect = "move"; };
+    const onDrop = (e, dropIndex) => { e.preventDefault(); if (draggedIndex !== null) onReorder(viewType, draggedIndex, dropIndex); setDraggedIndex(null); };
+
+    // Linkage logic
+    const isTaskDone = (taskName) => items.some(e => e.task.toLowerCase() === taskName.toLowerCase());
+
+    return (
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-slate-100 flex flex-col h-full">
+            <h3 className="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
+                {viewType === 'sod' ? <Calendar size={20} className="text-brand-600"/> : <CheckCircle size={20} className="text-green-600"/>} 
+                {title}
+            </h3>
+
+            {/* Config & Status */}
+            {viewType === 'sod' && (
+                 <div className="bg-slate-50 p-4 rounded-xl mb-4 border border-slate-100">
+                    <div className="flex justify-between items-center text-sm mb-2">
+                        <span className={remainingMins < 0 ? "text-red-600 font-bold" : "text-slate-600 font-medium"}>
+                            {remainingMins < 0 ? `${Math.abs(remainingHours)}h Over` : `${remainingHours}h Left`}
+                        </span>
+                        <span className="text-slate-500 font-medium">{formatHours(totalMins)}h Planned</span>
+                    </div>
+                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                        <div className={`h-full ${remainingMins < 0 ? 'bg-red-500' : 'bg-brand-500'}`} style={{ width: `${Math.min((totalMins / totalAvailableMins) * 100, 100)}%` }}></div>
                     </div>
                 </div>
-                <div className="flex-[3] pointer-events-none">
-                     <p className="text-slate-800 text-sm font-medium">{item.task}</p>
+            )}
+
+            {/* Input Form */}
+            <div className="mb-4 space-y-3">
+                <div className="flex gap-3">
+                     <input type="number" value={minutes} onChange={(e) => setMinutes(e.target.value)} className="w-24 p-3 bg-slate-50 rounded-lg text-base text-slate-800 border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all placeholder:text-slate-400" placeholder="Min" />
+                     <input type="text" placeholder={viewType === 'sod' ? "Plan Item..." : "Done Item..."} value={task} onChange={(e) => setTask(e.target.value)} className="flex-1 p-3 bg-slate-50 rounded-lg text-base text-slate-800 border border-slate-200 focus:ring-2 focus:ring-brand-500 focus:bg-white transition-all placeholder:text-slate-400" onKeyDown={(e) => e.key === 'Enter' && handleSave()} />
+                     <button onClick={handleSave} disabled={!task || !minutes} className="bg-brand-600 text-white p-3 rounded-lg disabled:opacity-50 hover:bg-brand-700 transition-colors shadow-sm"><Plus size={24}/></button>
                 </div>
+            </div>
+
+            {/* Linkage Area (EOD Only) */}
+            {viewType === 'eod' && linkageItems && (
+                <div className="mb-4 border-t border-slate-100 pt-3">
+                    <p className="text-xs font-bold text-slate-500 uppercase mb-2 tracking-wide">Planned Today</p>
+                    {linkageItems.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                            {linkageItems.map(item => {
+                                const done = isTaskDone(item.task);
+                                return (
+                                    <button key={item.id} onClick={() => !done && onLink(item)} disabled={done} className={`text-sm px-3 py-1.5 rounded-lg border transition-all text-left flex items-center gap-1.5 font-medium ${done ? 'bg-green-100 text-green-700 border-green-200 opacity-60' : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-brand-50 hover:text-brand-700 hover:border-brand-200'}`}>
+                                        {done && <CheckCircle size={12}/>} {item.task}
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    ) : <p className="text-sm text-slate-400 italic">No plans found for today.</p>}
+                </div>
+            )}
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto min-h-[200px] space-y-3 pr-1">
+                {scheduledItems.length === 0 ? (
+                    <div className="text-center py-10 text-slate-400 text-base italic">Nothing logged yet.</div>
+                ) : (
+                    scheduledItems.map((item, idx) => (
+                        <SwipeableListItem 
+                            key={item.id} 
+                            item={item} 
+                            index={idx}
+                            view={viewType}
+                            onEdit={onEdit}
+                            onDelete={onDelete}
+                            onDragStart={onDragStart}
+                            onDragOver={onDragOver}
+                            onDrop={onDrop}
+                        />
+                    ))
+                )}
             </div>
         </div>
     );
@@ -542,7 +602,6 @@ const AuthScreen = ({ onLogin }) => {
         try { 
             let loginEmail = email; if (email.trim() === 'admin') loginEmail = 'admin@loggr.com'; else if (!email.includes('@')) throw new Error("Please enter full email address."); 
             await signInWithEmailAndPassword(auth, loginEmail, password); 
-            // Disabled check is handled in App wrapper
         } catch (err) { setError(err.message.replace("Firebase:", "").trim()); setLoading(false); }
     };
     const handleForgotPassword = async () => {
@@ -591,13 +650,11 @@ const AuthScreen = ({ onLogin }) => {
 // --- User Dashboard ---
 const UserDashboard = ({ user }) => {
     const [selectedDate, setSelectedDate] = React.useState(null); 
-    const [view, setView] = React.useState('eod'); 
+    const [view, setView] = React.useState('sod'); // Only used for Mobile Toggle
     const [reportData, setReportData] = React.useState({ sod: [], eod: [], sodConfig: { start: "09:00", end: "17:00" } }); 
-    const [prevReportData, setPrevReportData] = React.useState({ sod: [], eod: [] });
     const [loading, setLoading] = React.useState(true);
     const [userSettings, setUserSettings] = React.useState(null);
     const [requiredHours, setRequiredHours] = React.useState(0);
-    const [newTask, setNewTask] = React.useState(() => { const saved = localStorage.getItem(`loggr_draft_${user.uid}`); return saved ? JSON.parse(saved) : { start: '09:00', end: '10:00', task: '', minutes: '' }; });
     const [showModal, setShowModal] = React.useState(false);
     const [showProfileModal, setShowProfileModal] = React.useState(false);
     const [modalContent, setModalContent] = React.useState({ title: '', body: '' });
@@ -608,8 +665,9 @@ const UserDashboard = ({ user }) => {
     const [showWelcomeModal, setShowWelcomeModal] = React.useState(false);
     const [editingItem, setEditingItem] = React.useState(null);
     const [editForm, setEditForm] = React.useState({ task: "", minutes: "" });
-    const [draggedIndex, setDraggedIndex] = React.useState(null);
     const [sodConfig, setSodConfig] = React.useState({ start: "09:00", end: "17:00" });
+    const [reportType, setReportType] = React.useState(""); // 'SOD' or 'EOD'
+    const [sodSimpleView, setSodSimpleView] = React.useState(true);
 
     React.useEffect(() => {
         const loadSettings = async () => {
@@ -618,12 +676,10 @@ const UserDashboard = ({ user }) => {
                 const data = snap.data();
                 setUserSettings(data);
                 
-                // Set default SOD config from profile
                 if (data.workConfig?.enabled) {
                     setSodConfig({ start: data.workConfig.start, end: data.workConfig.end });
                 }
 
-                // CHECK IF PROFILE IS INCOMPLETE (Mandatory Setup)
                 if (!data.position || !data.department || data.position === "N/A" || data.department === "N/A") {
                     setShowWelcomeModal(true);
                 }
@@ -648,10 +704,8 @@ const UserDashboard = ({ user }) => {
         if (!user || !selectedDate) return;
         const reportId = `${user.uid}_${selectedDate}`;
         const docRef = doc(db, "artifacts", APP_ID, "public", "data", "reports", reportId);
-        const prevDate = getPreviousDate(selectedDate);
-        const prevReportId = `${user.uid}_${prevDate}`;
-        const prevDocRef = doc(db, "artifacts", APP_ID, "public", "data", "reports", prevReportId);
-        const unsub1 = onSnapshot(docRef, (docSnap) => { 
+        
+        const unsub = onSnapshot(docRef, (docSnap) => { 
             if (docSnap.exists()) {
                 const data = docSnap.data();
                 setReportData(data);
@@ -661,16 +715,12 @@ const UserDashboard = ({ user }) => {
                 }
             } 
             else setReportData({ sod: [], eod: [], date: selectedDate, uid: user.uid, userName: user.displayName }); 
+            setLoading(false);
         });
-        const unsub2 = onSnapshot(prevDocRef, (docSnap) => { if (docSnap.exists()) setPrevReportData(docSnap.data()); else setPrevReportData({ sod: [], eod: [] }); setLoading(false); });
-        return () => { unsub1(); unsub2(); };
+        return () => unsub();
     }, [user, selectedDate, userSettings]);
 
-    React.useEffect(() => { localStorage.setItem(`loggr_draft_${user.uid}`, JSON.stringify(newTask)); }, [newTask, user]);
-
-    // Enhanced save to include position/dept context
-    const saveTask = async () => {
-        if (!newTask.task) return;
+    const saveTask = async (task, minutes, type) => {
         const reportId = `${user.uid}_${selectedDate}`;
         const docRef = doc(db, "artifacts", APP_ID, "public", "data", "reports", reportId);
         let updatedReport = { ...reportData };
@@ -678,22 +728,18 @@ const UserDashboard = ({ user }) => {
         updatedReport.country = userSettings?.country || "Unknown"; updatedReport.timezone = userSettings?.timezone || "UTC";
         updatedReport.position = userSettings?.position || "N/A"; updatedReport.department = userSettings?.department || "N/A";
         
-        // Save SOD Config
-        if(view === 'sod') updatedReport.sodConfig = sodConfig;
+        if(type === 'sod') updatedReport.sodConfig = sodConfig;
 
-        if (view === 'sod') {
-            const sodItem = { id: Date.now(), task: newTask.task, minutes: newTask.minutes };
-            updatedReport.sod = [...(updatedReport.sod || []), sodItem];
-        } else {
-            const eodItem = { id: Date.now(), task: newTask.task, minutes: newTask.minutes };
-            updatedReport.eod = [...(updatedReport.eod || []), eodItem];
-        }
+        const item = { id: Date.now(), task: task, minutes: minutes };
+        if (type === 'sod') updatedReport.sod = [...(updatedReport.sod || []), item];
+        else updatedReport.eod = [...(updatedReport.eod || []), item];
+        
         await setDoc(docRef, updatedReport, { merge: true });
-        setNewTask(prev => ({ ...prev, task: '', minutes: '' })); 
     };
 
-    const confirmLinkTask = async () => {
-        if (!linkMinutes || !linkingTask) return;
+    const confirmLinkTask = async (taskItem) => {
+        if (!linkMinutes) { setLinkingTask(taskItem); return; } // Open modal if mins not set
+        
         const reportId = `${user.uid}_${selectedDate}`;
         const docRef = doc(db, "artifacts", APP_ID, "public", "data", "reports", reportId);
         let updatedReport = { ...reportData };
@@ -720,14 +766,13 @@ const UserDashboard = ({ user }) => {
         const reportId = `${user.uid}_${selectedDate}`;
         const docRef = doc(db, "artifacts", APP_ID, "public", "data", "reports", reportId);
         let updatedReport = { ...reportData };
-        if (view === 'sod') {
-             updatedReport.sod = updatedReport.sod.map(item => 
-                item.id === editingItem.id ? { ...item, task: editForm.task, minutes: editForm.minutes } : item
-            );
+        
+        // Find which list to update
+        const isSod = (updatedReport.sod || []).some(i => i.id === editingItem.id);
+        if (isSod) {
+             updatedReport.sod = updatedReport.sod.map(item => item.id === editingItem.id ? { ...item, task: editForm.task, minutes: editForm.minutes } : item);
         } else {
-             updatedReport.eod = updatedReport.eod.map(item => 
-                item.id === editingItem.id ? { ...item, task: editForm.task, minutes: editForm.minutes } : item
-            );
+             updatedReport.eod = updatedReport.eod.map(item => item.id === editingItem.id ? { ...item, task: editForm.task, minutes: editForm.minutes } : item);
         }
         await setDoc(docRef, updatedReport, { merge: true });
         setEditingItem(null);
@@ -742,151 +787,178 @@ const UserDashboard = ({ user }) => {
         items.splice(toIndex, 0, movedItem);
 
         const updateData = viewType === 'sod' ? { sod: items } : { eod: items };
-        // Optimistically update local state to avoid jump
         setReportData(prev => ({ ...prev, ...updateData }));
         await setDoc(docRef, updateData, { merge: true });
     };
 
-    const onDragStart = (e, index) => {
-        setDraggedIndex(index);
-        e.dataTransfer.effectAllowed = "move";
-        // Ghost element automatic by browser
-    };
-
-    const onDragOver = (e, index) => {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = "move";
-    };
-
-    const onDrop = (e, dropIndex) => {
-        e.preventDefault();
-        if (draggedIndex !== null) {
-            handleReorder(view, draggedIndex, dropIndex);
-        }
-        setDraggedIndex(null);
-    };
-
     const handleExportCSV = () => {
         const rows = [["Date", "Type", "Time/Duration", "Task"]];
-        const calculatedSod = calculateSodSchedule(reportData.sod || [], sodConfig.start);
+        const calculatedSod = calculateSchedule(reportData.sod || [], sodConfig.start);
+        const calculatedEod = calculateSchedule(reportData.eod || [], sodConfig.start);
         calculatedSod.forEach(i => rows.push([selectedDate, "SOD", `${i.start} - ${i.end}`, `"${i.task}"`]));
-        (reportData.eod || []).forEach(i => rows.push([selectedDate, "EOD", `${i.minutes} mins`, `"${i.task}"`]));
+        calculatedEod.forEach(i => rows.push([selectedDate, "EOD", `${i.start} - ${i.end}`, `"${i.task}"`]));
         downloadCSV(rows, `Loggr_Report_${selectedDate}.csv`);
     };
 
     const generateReport = (type) => {
         let text = ""; const headerDate = getDisplayDate(selectedDate);
         if (type === 'SOD') { 
-            text = `🚀 SOD Report - ${headerDate}\n\nTasks for Next Working Day:\n`; 
+            text = `🚀 SOD Report - ${headerDate}\n\nTasks for Today:\n`; 
             if (!reportData.sod || reportData.sod.length === 0) text += "No tasks assigned yet."; 
             else {
-                // Calculate Times just for display
-                const itemsWithTimes = calculateSodSchedule(reportData.sod, sodConfig.start);
-                itemsWithTimes.forEach(item => { text += `• ${item.start} - ${item.end}: ${item.task}\n`; }); 
+                const itemsWithTimes = calculateSchedule(reportData.sod, sodConfig.start);
+                
+                if (sodSimpleView) {
+                    const amItems = itemsWithTimes.filter(i => {
+                        const h = parseInt(i.start.split(':')[0]);
+                        return h < 12;
+                    });
+                    const pmItems = itemsWithTimes.filter(i => {
+                        const h = parseInt(i.start.split(':')[0]);
+                        return h >= 12;
+                    });
+                    
+                    if(amItems.length > 0) {
+                        text += `\n☀️ AM (08:00am - 12:00pm):\n`;
+                        amItems.forEach(item => text += `• ${item.task}\n`);
+                    }
+                    if(pmItems.length > 0) {
+                        text += `\n🌤 PM (12:00pm - 05:30pm):\n`;
+                        pmItems.forEach(item => text += `• ${item.task}\n`);
+                    }
+                } else {
+                    itemsWithTimes.forEach(item => { text += `• ${item.start} - ${item.end}: ${item.task}\n`; }); 
+                }
             }
         } 
-        else { text = `✅ EOD Report - ${headerDate}\n\nCompleted Today:\n`; if (!reportData.eod || reportData.eod.length === 0) text += "No completion logged."; else { let totalMins = 0; reportData.eod.forEach(item => { text += `• ${item.task} (${formatHours(item.minutes)}h)\n`; totalMins += parseFloat(item.minutes || 0); }); text += `\nTotal Hours: ${formatHours(totalMins)}h`; } }
+        else { 
+            text = `✅ EOD Report - ${headerDate}\n\nCompleted Today:\n`; 
+            if (!reportData.eod || reportData.eod.length === 0) text += "No completion logged."; 
+            else { 
+                let totalMins = 0; 
+                // Use generic Schedule Calc for EOD to get times if needed, or just hours
+                const eodWithTimes = calculateSchedule(reportData.eod, sodConfig.start);
+                eodWithTimes.forEach(item => { 
+                    text += `• ${item.task} (${formatHours(item.minutes)}h)\n`; 
+                    totalMins += parseFloat(item.minutes || 0); 
+                }); 
+                text += `\nTotal Hours: ${formatHours(totalMins)}h`; 
+            } 
+        }
         return text;
     };
 
-    const handleEndDay = () => { setModalContent({ title: "End Day Report", body: generateReport('EOD') }); setShowModal(true); };
+    const handleEndDay = () => { setReportType('EOD'); setModalContent({ title: "End Day Report", body: generateReport('EOD') }); setShowModal(true); };
+    const handleStartDay = () => { setReportType('SOD'); setModalContent({ title: "Start Day Report", body: generateReport('SOD') }); setShowModal(true); };
+
     const totalLoggedMinutes = (reportData.eod || []).reduce((acc, curr) => acc + parseFloat(curr.minutes || 0), 0);
     const totalLoggedHours = totalLoggedMinutes / 60;
     const isWorkHoursMet = !userSettings?.workConfig?.enabled || (totalLoggedHours >= requiredHours);
-    const isTaskDone = (sodTaskName) => { return (reportData.eod || []).some(e => e.task.toLowerCase() === sodTaskName.toLowerCase()); };
 
     if (!selectedDate) return <div className="h-screen flex items-center justify-center text-slate-400">Loading profile...</div>;
-
-    // Computed Lists
-    const currentList = view === 'sod' 
-        ? calculateSodSchedule(reportData.sod || [], sodConfig.start) // Compute times on the fly for render
-        : (reportData.eod || []);
-
-    // SOD Calculation for Progress Bar
-    const totalSodMins = (reportData.sod || []).reduce((acc, curr) => acc + parseFloat(curr.minutes || 0), 0);
-    const startD = new Date(`1970-01-01T${sodConfig.start}`);
-    const endD = new Date(`1970-01-01T${sodConfig.end}`);
-    const totalAvailableMins = (endD - startD) / 60000;
-    const remainingMins = totalAvailableMins - totalSodMins;
-    const remainingHours = (remainingMins / 60).toFixed(1);
 
     return (
         <div className="pb-44">
             <Toast message="Copied!" show={showToast} onClose={() => setShowToast(false)} />
             <div className="bg-white p-4 shadow-sm sticky top-0 z-20">
                 <div className="flex justify-between items-center">
-                    <div><h2 className="font-bold text-slate-800 text-lg">Hi, {user.displayName?.split(' ')[0]} 👋</h2><p className="text-xs text-slate-500 font-medium">{getTodayFullInTimezone(userSettings?.timezone)} • {getCurrentTimeInTimezone(userSettings?.timezone)}</p></div>
+                    <div><h2 className="font-bold text-slate-800 text-lg">Hi, {user.displayName?.split(' ')[0]} 👋</h2><p className="text-xs text-slate-500 font-medium">{getTodayFullInTimezone(userSettings?.timezone)}</p></div>
                     <div className="flex gap-2">
                         <button onClick={() => { setIsMandatoryProfile(false); setShowProfileModal(true); }} className="p-2 text-slate-400 hover:text-brand-600"><Settings size={20}/></button>
                         <button onClick={() => auth.signOut()} className="p-2 text-slate-400 hover:text-red-500"><LogOut size={20}/></button>
                     </div>
                 </div>
             </div>
-            <div className="p-4 max-w-lg mx-auto">
-                <DateStrip selectedDate={selectedDate} onSelect={setSelectedDate} timezone={userSettings?.timezone} />
-                <div className="flex bg-slate-100 p-1 rounded-xl mb-6"><button onClick={() => setView('eod')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${view === 'eod' ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500'}`}>EOD (Done)</button><button onClick={() => setView('sod')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${view === 'sod' ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500'}`}>SOD (Plan)</button></div>
-                <div className="space-y-6 fade-in">
-                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100">
-                        <h3 className="font-bold text-slate-700 mb-3 flex items-center gap-2"><Plus size={18} className="text-brand-500"/> {view === 'sod' ? 'Plan for Next Working Day' : 'Log Today\'s Activity'}</h3>
-                        
-                        {view === 'sod' && (
-                            <div className="bg-slate-50 p-3 rounded-xl mb-3 border border-slate-100">
-                                <div className="grid grid-cols-2 gap-3 mb-2">
-                                    <div>
-                                        <label className="text-[10px] uppercase font-bold text-slate-400">Day Start</label>
-                                        <input type="time" className="w-full bg-white p-1 rounded border border-slate-200 text-sm" value={sodConfig.start} onChange={e => { const n = {...sodConfig, start: e.target.value}; setSodConfig(n); setDoc(doc(db, "artifacts", APP_ID, "public", "data", "reports", `${user.uid}_${selectedDate}`), { sodConfig: n }, { merge: true }); }} />
-                                    </div>
-                                    <div>
-                                        <label className="text-[10px] uppercase font-bold text-slate-400">Day End</label>
-                                        <input type="time" className="w-full bg-white p-1 rounded border border-slate-200 text-sm" value={sodConfig.end} onChange={e => { const n = {...sodConfig, end: e.target.value}; setSodConfig(n); setDoc(doc(db, "artifacts", APP_ID, "public", "data", "reports", `${user.uid}_${selectedDate}`), { sodConfig: n }, { merge: true }); }} />
-                                    </div>
-                                </div>
-                                <div className="flex justify-between items-center text-xs">
-                                    <span className={remainingMins < 0 ? "text-red-500 font-bold" : "text-slate-500"}>
-                                        {remainingMins < 0 ? `${Math.abs(remainingHours)}h Overbooked` : `${remainingHours}h Remaining`}
-                                    </span>
-                                    <span className="text-slate-400">{formatHours(totalSodMins)}h Scheduled</span>
-                                </div>
-                                <div className="w-full bg-slate-200 h-1.5 rounded-full mt-1 overflow-hidden">
-                                    <div className={`h-full ${remainingMins < 0 ? 'bg-red-500' : 'bg-brand-500'}`} style={{ width: `${Math.min((totalSodMins / totalAvailableMins) * 100, 100)}%` }}></div>
-                                </div>
-                            </div>
-                        )}
+            
+            <div className="p-4 max-w-5xl mx-auto">
+                {/* Removed DateStrip */}
+                
+                {/* Config Row (Visible only for SOD or if modifying Start Time) */}
+                <div className="bg-white p-3 rounded-xl mb-6 border border-slate-100 shadow-sm flex flex-wrap gap-4 items-center justify-between">
+                     <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-slate-400 uppercase">Working Hours:</span>
+                        <input type="time" className="bg-slate-50 p-1 rounded border border-slate-200 text-xs font-mono" value={sodConfig.start} onChange={e => { const n = {...sodConfig, start: e.target.value}; setSodConfig(n); setDoc(doc(db, "artifacts", APP_ID, "public", "data", "reports", `${user.uid}_${selectedDate}`), { sodConfig: n }, { merge: true }); }} />
+                        <span className="text-slate-400">-</span>
+                        <input type="time" className="bg-slate-50 p-1 rounded border border-slate-200 text-xs font-mono" value={sodConfig.end} onChange={e => { const n = {...sodConfig, end: e.target.value}; setSodConfig(n); setDoc(doc(db, "artifacts", APP_ID, "public", "data", "reports", `${user.uid}_${selectedDate}`), { sodConfig: n }, { merge: true }); }} />
+                     </div>
+                     <div className="flex gap-2">
+                         <button onClick={handleStartDay} disabled={(!reportData.sod || reportData.sod.length === 0)} className="text-xs font-bold bg-brand-50 text-brand-600 px-3 py-1.5 rounded-lg hover:bg-brand-100 disabled:opacity-50">Generate SOD</button>
+                         <button onClick={handleEndDay} disabled={!isWorkHoursMet} className="text-xs font-bold bg-slate-800 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700 disabled:opacity-50">Generate EOD</button>
+                         <button onClick={handleExportCSV} className="text-xs font-bold text-slate-500 px-3 py-1.5 hover:text-slate-700">Export CSV</button>
+                     </div>
+                </div>
 
-                        <div className="mb-3"><label className="text-[10px] uppercase font-bold text-slate-400">Duration (Minutes)</label><input type="number" value={newTask.minutes} onChange={(e) => setNewTask({...newTask, minutes: e.target.value})} className="w-full p-2 bg-slate-50 rounded-lg text-sm" placeholder="e.g. 60" /></div>
-                        
-                        <div className="flex gap-2"><input type="text" placeholder={view === 'sod' ? "Task Name" : "Activity Description"} value={newTask.task} onChange={(e) => setNewTask({...newTask, task: e.target.value})} className="flex-1 p-2 bg-slate-50 rounded-lg text-sm border border-slate-200" onKeyDown={(e) => e.key === 'Enter' && saveTask()} /><button onClick={saveTask} disabled={!newTask.task || !newTask.minutes} className="bg-brand-600 text-white p-2 rounded-lg disabled:opacity-50"><Plus size={20}/></button></div>
-                        {view === 'eod' && ( <div className="mt-4 border-t border-slate-100 pt-3"><p className="text-[10px] font-bold text-slate-400 uppercase mb-2">Planned from Yesterday ({getPreviousDate(selectedDate)})</p>{prevReportData.sod && prevReportData.sod.length > 0 ? ( <div className="flex flex-wrap gap-2">{prevReportData.sod.map(item => { const done = isTaskDone(item.task); return ( <button key={item.id} onClick={() => !done && setLinkingTask(item)} disabled={done} className={`text-xs px-3 py-1.5 rounded-lg border transition-all text-left flex items-center gap-1 ${done ? 'bg-green-100 text-green-700 border-green-200 cursor-default' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-brand-50 hover:border-brand-200 hover:text-brand-600'}`}>{done && <CheckCircle size={10}/>} {item.task}</button> ) })}</div> ) : ( <div className="text-xs text-slate-400 italic">First Day? No pending plans found from yesterday. You can log completed activities directly above.</div> )}</div> )}
+                {/* Mobile Tab Toggle */}
+                <div className="md:hidden flex bg-slate-100 p-1 rounded-xl mb-6">
+                    <button onClick={() => setView('sod')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${view === 'sod' ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500'}`}>SOD (Plan)</button>
+                    <button onClick={() => setView('eod')} className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${view === 'eod' ? 'bg-white text-brand-600 shadow-sm' : 'text-slate-500'}`}>EOD (Done)</button>
+                </div>
+
+                {/* Main Content Area */}
+                <div className={`fade-in ${view === 'sod' ? 'block' : 'hidden'} md:grid md:grid-cols-2 md:gap-6 md:block`}>
+                    
+                    {/* SOD Column */}
+                    <div className="md:col-span-1 h-full">
+                        <TaskPanel 
+                            title="Plan for Today (SOD)" 
+                            viewType="sod"
+                            items={reportData.sod || []}
+                            sodConfig={sodConfig}
+                            onSave={saveTask}
+                            onDelete={deleteTask}
+                            onEdit={(item) => { setEditingItem(item); setEditForm({ task: item.task, minutes: item.minutes }); }}
+                            onReorder={handleReorder}
+                        />
                     </div>
-                    <div className="space-y-3">
-                        {loading ? <div className="text-center py-10 text-slate-400">Loading tasks...</div> : currentList.length === 0 ? ( <div className="text-center py-10"><div className="inline-block p-4 rounded-full bg-slate-100 mb-2">{view === 'sod' ? <Calendar className="text-slate-400"/> : <CheckCircle className="text-slate-400"/>}</div><p className="text-slate-500 text-sm">No tasks logged yet.</p></div> ) : ( 
-                            currentList.map((item, idx) => ( 
-                                <SwipeableListItem 
-                                    key={item.id} 
-                                    item={item} 
-                                    index={idx}
-                                    view={view}
-                                    onEdit={(i) => { setEditingItem(i); setEditForm({ task: i.task, minutes: i.minutes }); }}
-                                    onDelete={deleteTask}
-                                    onDragStart={onDragStart}
-                                    onDragOver={onDragOver}
-                                    onDrop={onDrop}
-                                /> 
-                            )) 
-                        )}
+
+                    {/* EOD Column (Visible on Mobile only if view is eod, always visible on Desktop) */}
+                    <div className={`${view === 'eod' ? 'block' : 'hidden'} md:block md:col-span-1 h-full mt-6 md:mt-0`}>
+                        <TaskPanel 
+                            title="Completed Today (EOD)" 
+                            viewType="eod"
+                            items={reportData.eod || []}
+                            sodConfig={sodConfig}
+                            onSave={saveTask}
+                            onDelete={deleteTask}
+                            onEdit={(item) => { setEditingItem(item); setEditForm({ task: item.task, minutes: item.minutes }); }}
+                            onReorder={handleReorder}
+                            linkageItems={reportData.sod || []} // Link to TODAY'S SOD
+                            onLink={(item) => { setLinkingTask(item); setShowModal(false); }}
+                        />
                     </div>
                 </div>
             </div>
-            <div className="fixed bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-slate-200 p-4 z-30"><div className="max-w-lg mx-auto flex flex-col gap-2">{view === 'eod' && userSettings?.workConfig?.enabled && ( <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden mb-1"><div className={`h-full ${isWorkHoursMet ? 'bg-green-500' : 'bg-brand-500'}`} style={{ width: `${Math.min((totalLoggedHours / requiredHours) * 100, 100)}%` }}></div></div> )}{view === 'sod' ? ( <Button onClick={() => { setModalContent({ title: "Start Day Report", body: generateReport('SOD') }); setShowModal(true); }} disabled={(!reportData.sod || reportData.sod.length === 0)} className="shadow-lg shadow-brand-200">Start the Day</Button> ) : ( <Button onClick={handleEndDay} variant={isWorkHoursMet ? 'primary' : 'disabled'} disabled={!isWorkHoursMet} className="bg-slate-800 hover:bg-slate-900 shadow-lg shadow-slate-300">{isWorkHoursMet ? "End the Day" : `Finish ${formatHours((requiredHours * 60) - totalLoggedMinutes)}h more`}</Button> )}<button onClick={handleExportCSV} className="text-xs text-brand-600 font-medium py-2 hover:underline">Export to CSV</button></div></div>
-            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={modalContent.title}><div className="bg-slate-50 p-4 rounded-lg text-sm font-mono whitespace-pre-wrap mb-4 border border-slate-200">{modalContent.body}</div><Button onClick={() => { const textArea = document.createElement("textarea"); textArea.value = modalContent.body; document.body.appendChild(textArea); textArea.select(); try { document.execCommand('copy'); setShowToast(true); } catch (err) {} document.body.removeChild(textArea); setShowModal(false); }}><Copy size={18} /> Copy to Clipboard</Button></Modal>
-            <Modal isOpen={!!linkingTask} onClose={() => setLinkingTask(null)} title="Complete Task"><div className="space-y-4"><p className="text-sm text-slate-600">How many minutes did you spend on <span className="font-bold">"{linkingTask?.task}"</span>?</p><Input type="number" value={linkMinutes} onChange={(e) => setLinkMinutes(e.target.value)} placeholder="e.g. 60" /><Button onClick={confirmLinkTask} disabled={!linkMinutes}>Log & Mark Done</Button></div></Modal>
-            <Modal isOpen={showWelcomeModal} onClose={() => {}} title="Welcome!" allowClose={false}>
-                <div className="text-center space-y-4">
-                    <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2"><UserIcon size={32} /></div>
-                    <p className="text-slate-600">Please complete your profile setup (Department & Position) to start using Loggr.</p>
-                    <Button onClick={() => { setShowWelcomeModal(false); setIsMandatoryProfile(true); setShowProfileModal(true); }}>Proceed to Setup</Button>
+
+            {/* Modals */}
+            <Modal isOpen={showModal} onClose={() => setShowModal(false)} title={modalContent.title}>
+                {reportType === 'SOD' && (
+                    <div className="mb-4 flex items-center justify-end">
+                         <label className="flex items-center gap-2 cursor-pointer text-xs text-slate-500">
+                             <input type="checkbox" checked={sodSimpleView} onChange={(e) => { setSodSimpleView(e.target.checked); setModalContent({ ...modalContent, body: "" }); /* Trigger re-render effect indirectly by simple state change, effect will run below */ }} className="rounded text-brand-600 focus:ring-brand-500" />
+                             Simple View (AM/PM)
+                         </label>
+                    </div>
+                )}
+                {/* Recalculate body when toggle changes (Effect simulation) */}
+                {(() => {
+                    const currentBody = generateReport(reportType);
+                    return (
+                        <>
+                             <div className="bg-slate-50 p-4 rounded-lg text-sm font-mono whitespace-pre-wrap mb-4 border border-slate-200">{currentBody}</div>
+                             <Button onClick={() => { const textArea = document.createElement("textarea"); textArea.value = currentBody; document.body.appendChild(textArea); textArea.select(); try { document.execCommand('copy'); setShowToast(true); } catch (err) {} document.body.removeChild(textArea); setShowModal(false); }}><Copy size={18} /> Copy to Clipboard</Button>
+                        </>
+                    )
+                })()}
+            </Modal>
+
+            <Modal isOpen={!!linkingTask} onClose={() => setLinkingTask(null)} title="Complete Task">
+                <div className="space-y-4">
+                    <p className="text-sm text-slate-600">How many minutes did you spend on <span className="font-bold">"{linkingTask?.task}"</span>?</p>
+                    <Input type="number" value={linkMinutes} onChange={(e) => setLinkMinutes(e.target.value)} placeholder="e.g. 60" />
+                    <Button onClick={() => confirmLinkTask(linkingTask)} disabled={!linkMinutes}>Log & Mark Done</Button>
                 </div>
             </Modal>
+
             <Modal isOpen={!!editingItem} onClose={() => setEditingItem(null)} title="Edit Task">
                 <div className="space-y-4">
                     <Input label="Task Description" value={editForm.task} onChange={e => setEditForm({...editForm, task: e.target.value})} />
@@ -894,6 +966,15 @@ const UserDashboard = ({ user }) => {
                     <Button onClick={confirmEdit}>Save Changes</Button>
                 </div>
             </Modal>
+            
+            <Modal isOpen={showWelcomeModal} onClose={() => {}} title="Welcome!" allowClose={false}>
+                <div className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-2"><UserIcon size={32} /></div>
+                    <p className="text-slate-600">Please complete your profile setup (Department & Position) to start using Loggr.</p>
+                    <Button onClick={() => { setShowWelcomeModal(false); setIsMandatoryProfile(true); setShowProfileModal(true); }}>Proceed to Setup</Button>
+                </div>
+            </Modal>
+
             <ProfileModal isOpen={showProfileModal} onClose={() => setShowProfileModal(false)} user={user} userSettings={userSettings} isMandatory={isMandatoryProfile} />
         </div>
     );
