@@ -1,12 +1,21 @@
 /* Base styles for mobile-first feel */
 body {
-    background-color: #f8fafc;
+    background-color: #EBE2E0; /* Light Grayish Pink */
     -webkit-tap-highlight-color: transparent;
+    font-size: 16px; /* Base font size boost */
+    line-height: 1.5;
+    color: #575757; /* Dark Gray */
 }
 
 /* Prevent iOS Zoom on inputs */
 input, select, textarea {
     font-size: 16px !important;
+}
+
+/* Better placeholder visibility */
+::placeholder {
+    color: #94a3b8;
+    opacity: 1; 
 }
 
 /* Custom Scrollbar */
@@ -26,4 +35,17 @@ input, select, textarea {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(5px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Grid Layout Enhancements */
+@media (min-width: 768px) {
+    .hide-scrollbar::-webkit-scrollbar {
+        display: block;
+        width: 6px;
+        background-color: #f1f5f9;
+    }
+    .hide-scrollbar::-webkit-scrollbar-thumb {
+        background-color: #cbd5e1;
+        border-radius: 3px;
+    }
 }
