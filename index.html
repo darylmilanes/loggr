@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Loggr | Professional Time Tracker</title>
     
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='8' height='4' x='8' y='2' rx='1' ry='1'/><path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2'/><path d='M12 11h4'/><path d='M12 16h4'/><path d='M8 11h.01'/><path d='M8 16h.01'/></svg>">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect width='8' height='4' x='8' y='2' rx='1' ry='1'/><path d='M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1-2-2h2'/><path d='M12 11h4'/><path d='M12 16h4'/><path d='M8 11h.01'/><path d='M8 16h.01'/></svg>">
 
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -76,7 +76,36 @@
             color: #334155; 
         }
 
-        /* Glassmorphism Utilities - Dark Mode */
+        /* --- DYNAMIC TEXT COLORS (The Solution) --- */
+        
+        /* Main Headings & Primary Text */
+        .text-main { color: #ffffff; }
+        body.light-mode .text-main { color: #0f172a; } /* Slate-900 */
+
+        /* Subtitles & Labels */
+        .text-muted { color: #94a3b8; } /* Slate-400 */
+        body.light-mode .text-muted { color: #64748b; } /* Slate-500 */
+
+        /* Blue Accents (SOD) */
+        .text-accent-blue { color: #93c5fd; } /* Blue-300 */
+        body.light-mode .text-accent-blue { color: #2563eb; } /* Blue-600 */
+
+        /* Emerald Accents (EOD) */
+        .text-accent-emerald { color: #6ee7b7; } /* Emerald-300 */
+        body.light-mode .text-accent-emerald { color: #059669; } /* Emerald-600 */
+        
+        /* Red Accents (Errors/Over Capacity) */
+        .text-accent-red { color: #f87171; } /* Red-400 */
+        body.light-mode .text-accent-red { color: #dc2626; } /* Red-600 */
+        
+        /* Specific EOD Time Columns */
+        .text-eod-duration { color: #6ee7b7; } 
+        body.light-mode .text-eod-duration { color: #047857; } 
+        .text-eod-time { color: #34d399; }     
+        body.light-mode .text-eod-time { color: #059669; }
+
+
+        /* Glassmorphism Utilities */
         .glass-panel {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(16px);
@@ -101,9 +130,7 @@
             outline: none;
         }
         
-        .glass-card:focus-visible {
-            box-shadow: 0 0 0 2px #3b82f6;
-        }
+        .glass-card:focus-visible { box-shadow: 0 0 0 2px #3b82f6; }
 
         .glass-input {
             background: rgba(0, 0, 0, 0.2);
@@ -119,7 +146,7 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
-        /* --- Glassmorphism Utilities - Light Mode Overrides --- */
+        /* Light Mode Glass Overrides */
         body.light-mode .glass-panel {
             background: rgba(255, 255, 255, 0.65);
             border: 1px solid rgba(255, 255, 255, 0.8);
@@ -151,35 +178,14 @@
             box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-        }
-        ::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-        }
-        body.light-mode ::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.1);
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        body.light-mode ::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.2);
-        }
-
+        /* Hide Scrollbars */
+        ::-webkit-scrollbar { width: 0px; background: transparent; display: none; }
+        .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
         /* Drag and Drop Ghost */
-        .sortable-ghost {
-            opacity: 0.2;
-            background: #3b82f6; 
-        }
+        .sortable-ghost { opacity: 0.2; background: #3b82f6; }
         .sortable-drag {
-            cursor: grabbing;
-            opacity: 1;
+            cursor: grabbing; opacity: 1;
             background: rgba(59, 130, 246, 0.2);
             backdrop-filter: blur(20px);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
@@ -187,32 +193,20 @@
         }
 
         input[type=number]::-webkit-inner-spin-button, 
-        input[type=number]::-webkit-outer-spin-button { 
-            -webkit-appearance: none; 
-            margin: 0; 
-        }
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 
-        /* Toast Notification Light Mode Overrides */
+        /* Toast Light Mode Override */
         body.light-mode #toast {
             background-color: #ffffff;
             border-color: #e2e8f0; 
             box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
         }
-        body.light-mode #toast .text-green-400 {
-            color: #15803d; 
-        }
-        body.light-mode #btn-toast-undo {
-            border-color: #e2e8f0;
-        }
-        body.light-mode #btn-toast-undo:hover {
-            color: #1e3a8a; 
-        }
+        body.light-mode #toast .text-green-400 { color: #15803d; }
+        body.light-mode #btn-toast-undo { border-color: #e2e8f0; }
+        body.light-mode #btn-toast-undo:hover { color: #1e3a8a; }
 
-        /* Utility to force text size on mobile inputs to prevent zoom */
         @media screen and (max-width: 768px) {
-            input, select, textarea {
-                font-size: 16px !important;
-            }
+            input, select, textarea { font-size: 16px !important; }
         }
     </style>
 </head>
@@ -236,20 +230,20 @@
                             <i data-lucide="clipboard-list" class="w-8 h-8 text-white"></i>
                         </div>
                     </div>
-                    <h1 id="auth-title" class="text-3xl font-bold mb-2 tracking-tight">Welcome to Loggr</h1>
-                    <p id="auth-subtitle" class="text-slate-400 mb-8 text-sm">Professional Day Orchestrator</p>
+                    <h1 id="auth-title" class="text-3xl font-bold mb-2 tracking-tight text-main">Welcome to Loggr</h1>
+                    <p id="auth-subtitle" class="text-muted mb-8 text-sm">Professional Day Orchestrator</p>
 
                     <form id="login-form" class="space-y-4 text-left">
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1 ml-1">Email</label>
+                            <label class="block text-xs font-medium text-muted mb-1 ml-1">Email</label>
                             <input type="email" id="email" class="glass-input w-full px-4 py-3 rounded-xl text-base" placeholder="you@company.com" required>
                         </div>
                         <div>
-                            <label class="block text-xs font-medium text-slate-400 mb-1 ml-1">Password</label>
+                            <label class="block text-xs font-medium text-muted mb-1 ml-1">Password</label>
                             <input type="password" id="password" class="glass-input w-full px-4 py-3 rounded-xl text-base" placeholder="••••••••" required>
                         </div>
                         
-                        <div class="flex items-center justify-between text-xs text-slate-400 mt-2">
+                        <div class="flex items-center justify-between text-xs text-muted mt-2">
                              <label class="flex items-center gap-2 cursor-pointer">
                                 <input type="checkbox" id="remember-me" class="rounded border-gray-600 text-blue-600 focus:ring-blue-500 bg-transparent">
                                 <span>Remember me</span>
@@ -263,13 +257,13 @@
                         </button>
                     </form>
 
-                    <div class="mt-6 pt-6 border-t border-white/10 text-xs text-slate-400">
+                    <div class="mt-6 pt-6 border-t border-white/10 text-xs text-muted">
                         <span id="auth-switch-text">Don't have an account?</span>
                         <button id="btn-switch-auth" class="text-blue-400 hover:text-blue-300 font-semibold ml-1 transition-colors">Create Profile</button>
                     </div>
 
-                    <p id="auth-error" class="text-red-400 text-xs mt-4 hidden text-center bg-red-500/10 p-2 rounded-lg border border-red-500/20"></p>
-                    <p id="auth-success" class="text-emerald-400 text-xs mt-4 hidden text-center bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20"></p>
+                    <p id="auth-error" class="text-accent-red text-xs mt-4 hidden text-center bg-red-500/10 p-2 rounded-lg border border-red-500/20"></p>
+                    <p id="auth-success" class="text-accent-emerald text-xs mt-4 hidden text-center bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20"></p>
                 </div>
             </div>
         </div>
@@ -282,35 +276,35 @@
                         <i data-lucide="clipboard-list" class="w-6 h-6 text-white"></i>
                     </div>
                     <div>
-                        <h2 id="current-date" class="text-xl font-bold tracking-tight text-white">Today</h2>
-                        <div class="flex items-center gap-2 text-xs text-slate-400">
+                        <h2 id="current-date" class="text-xl font-bold tracking-tight text-main">Today</h2>
+                        <div class="flex items-center gap-2 text-xs text-muted">
                             <span id="user-email-display">user@loggr.app</span>
                             <span class="w-1 h-1 bg-slate-500 rounded-full"></span>
-                            <button id="btn-logout" class="hover:text-white transition-colors">Sign Out</button>
+                            <button id="btn-logout" class="hover:text-main transition-colors">Sign Out</button>
                         </div>
                     </div>
                 </div>
 
                 <div class="glass-panel px-4 py-3 rounded-xl flex flex-wrap items-center gap-4 md:gap-6 text-sm">
-                    <button id="btn-wipe-data" class="p-2 rounded-full hover:bg-red-500/10 text-slate-400 hover:text-red-400 transition-colors" title="Wipe Data / Start Fresh">
+                    <button id="btn-wipe-data" class="p-2 rounded-full hover:bg-red-500/10 text-muted hover:text-red-400 transition-colors" title="Wipe Data / Start Fresh">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                     <div class="w-px h-4 bg-white/10 hidden sm:block"></div>
-                    <button id="btn-theme-toggle" class="p-2 rounded-full hover:bg-white/10 text-slate-400 hover:text-yellow-400 transition-colors" title="Toggle Light/Dark Mode">
+                    <button id="btn-theme-toggle" class="p-2 rounded-full hover:bg-white/10 text-muted hover:text-yellow-400 transition-colors" title="Toggle Light/Dark Mode">
                         <i data-lucide="sun" class="w-4 h-4 hidden dark-icon"></i>
                         <i data-lucide="moon" class="w-4 h-4 light-icon"></i>
                     </button>
                     <div class="w-px h-4 bg-white/10 hidden sm:block"></div>
                     <div class="flex items-center gap-2">
                         <i data-lucide="clock" class="w-4 h-4 text-blue-400"></i>
-                        <span class="text-slate-400 hidden sm:inline">Shift Start:</span>
-                        <input type="time" id="setting-start-time" class="bg-transparent border-none text-white focus:ring-0 cursor-pointer font-medium text-base" value="08:00">
+                        <span class="text-muted hidden sm:inline">Shift Start:</span>
+                        <input type="time" id="setting-start-time" class="bg-transparent border-none text-main focus:ring-0 cursor-pointer font-medium text-base" value="08:00">
                     </div>
                     <div class="w-px h-4 bg-white/10 hidden sm:block"></div>
                     <div class="flex items-center gap-2">
                         <i data-lucide="hourglass" class="w-4 h-4 text-cyan-400"></i>
-                        <span class="text-slate-400 hidden sm:inline">Hours:</span>
-                        <input type="number" id="setting-shift-hours" class="bg-transparent border-none text-white focus:ring-0 w-16 font-medium text-base" value="9.5" step="0.5" min="1" max="24">
+                        <span class="text-muted hidden sm:inline">Hours:</span>
+                        <input type="number" id="setting-shift-hours" class="bg-transparent border-none text-main focus:ring-0 w-16 font-medium text-base" value="9.5" step="0.5" min="1" max="24">
                     </div>
                 </div>
             </header>
@@ -322,15 +316,15 @@
                         <div class="flex items-center gap-3">
                             <div class="w-2 h-8 bg-blue-500 rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)]"></div>
                             <div>
-                                <h3 class="font-bold text-lg text-white">SOD</h3>
-                                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Start of Day</p>
+                                <h3 class="font-bold text-lg text-main">SOD</h3>
+                                <p class="text-xs text-muted uppercase tracking-wider font-semibold">Start of Day</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                             <button id="btn-sod-report-settings" class="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white transition-colors" title="Report Settings">
+                             <button id="btn-sod-report-settings" class="p-2 hover:bg-white/10 rounded-lg text-muted hover:text-main transition-colors" title="Report Settings">
                                 <i data-lucide="settings-2" class="w-4 h-4"></i>
                             </button>
-                            <button id="btn-copy-sod" class="p-2 hover:bg-white/10 rounded-lg text-blue-300 hover:text-white transition-colors group-hover:bg-blue-500/20" title="Copy SOD Report">
+                            <button id="btn-copy-sod" class="p-2 hover:bg-white/10 rounded-lg text-blue-300 hover:text-main transition-colors group-hover:bg-blue-500/20" title="Copy SOD Report">
                                 <i data-lucide="copy" class="w-4 h-4"></i>
                             </button>
                             <button id="btn-add-sod" class="p-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg shadow-lg shadow-blue-500/30 transition-all active:scale-95">
@@ -341,18 +335,17 @@
 
                     <div class="px-6 mb-4">
                         <div class="flex justify-between text-xs mb-1 font-medium">
-                            <span class="text-slate-400">Planned Capacity</span>
-                            <span id="sod-capacity-text" class="text-blue-300">0%</span>
+                            <span class="text-muted">Planned Capacity</span>
+                            <span id="sod-capacity-text" class="text-accent-blue">0%</span>
                         </div>
                         <div class="w-full bg-slate-800/50 rounded-full h-1.5 overflow-hidden">
                             <div id="sod-progress-bar" class="bg-gradient-to-r from-blue-600 to-cyan-500 h-1.5 rounded-full transition-all duration-500 w-0"></div>
                         </div>
                     </div>
 
-                    <div class="flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar" id="sod-list">
-                        </div>
+                    <div class="flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar" id="sod-list"></div>
 
-                    <div id="bin-area" class="absolute bottom-4 left-4 right-4 h-16 border-2 border-dashed border-red-500/30 bg-red-500/10 rounded-xl hidden flex items-center justify-center text-red-300 z-20 transition-all duration-300">
+                    <div id="bin-area" class="absolute bottom-4 left-4 right-4 h-16 border-2 border-dashed border-red-500/30 bg-red-500/10 rounded-xl hidden flex items-center justify-center text-accent-red z-20 transition-all duration-300">
                         <i data-lucide="trash-2" class="w-6 h-6 mr-2"></i> Drop here to delete
                     </div>
                 </div>
@@ -362,12 +355,12 @@
                         <div class="flex items-center gap-3">
                             <div class="w-2 h-8 bg-emerald-500 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.5)]"></div>
                             <div>
-                                <h3 class="font-bold text-lg text-white">EOD</h3>
-                                <p class="text-xs text-slate-400 uppercase tracking-wider font-semibold">End of Day</p>
+                                <h3 class="font-bold text-lg text-main">EOD</h3>
+                                <p class="text-xs text-muted uppercase tracking-wider font-semibold">End of Day</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button id="btn-copy-eod" class="p-2 hover:bg-white/10 rounded-lg text-emerald-300 hover:text-white transition-colors group-hover:bg-emerald-500/20" title="Copy EOD Report">
+                            <button id="btn-copy-eod" class="p-2 hover:bg-white/10 rounded-lg text-emerald-300 hover:text-main transition-colors group-hover:bg-emerald-500/20" title="Copy EOD Report">
                                 <i data-lucide="copy" class="w-4 h-4"></i>
                             </button>
                             <button id="btn-add-eod-manual" class="p-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-lg shadow-emerald-500/30 transition-all active:scale-95">
@@ -378,8 +371,8 @@
 
                     <div class="px-6 mb-4">
                         <div class="flex justify-between text-xs mb-1 font-medium">
-                            <span class="text-slate-400">Time Logged</span>
-                            <span id="eod-capacity-text" class="text-emerald-300">0 hrs</span>
+                            <span class="text-muted">Time Logged</span>
+                            <span id="eod-capacity-text" class="text-accent-emerald">0 hrs</span>
                         </div>
                         <div class="w-full bg-slate-800/50 rounded-full h-1.5 overflow-hidden">
                             <div id="eod-progress-bar" class="bg-gradient-to-r from-emerald-600 to-teal-400 h-1.5 rounded-full transition-all duration-500 w-0"></div>
@@ -387,7 +380,7 @@
                     </div>
 
                     <div class="flex-1 overflow-y-auto px-4 pb-4 custom-scrollbar" id="eod-list">
-                        <div id="eod-placeholder" class="h-full flex flex-col items-center justify-center text-slate-500 opacity-50 border-2 border-dashed border-slate-700 rounded-xl m-2">
+                        <div id="eod-placeholder" class="h-full flex flex-col items-center justify-center text-muted opacity-50 border-2 border-dashed border-slate-700 rounded-xl m-2">
                             <i data-lucide="arrow-left" class="w-8 h-8 mb-2 lg:hidden"></i>
                             <i data-lucide="arrow-left" class="w-8 h-8 mb-2 hidden lg:block rotate-180 transform -translate-x-1/2"></i>
                             <p class="text-sm font-medium">Drag Completed SOD Tasks Here</p>
@@ -399,23 +392,23 @@
 
         <div id="item-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div class="glass-panel w-full max-w-sm p-6 rounded-2xl shadow-2xl transform scale-95 opacity-0 transition-all duration-200" id="item-modal-content">
-                <h3 id="modal-title" class="text-xl font-bold mb-4 text-white">Add Item</h3>
+                <h3 id="modal-title" class="text-xl font-bold mb-4 text-main">Add Item</h3>
                 <form id="item-form" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1 ml-1">Activity Description</label>
+                        <label class="block text-xs font-medium text-muted mb-1 ml-1">Activity Description</label>
                         <input type="text" id="input-title" class="glass-input w-full px-4 py-3 rounded-xl text-base" placeholder="e.g., Check Emails" required autofocus autocomplete="off">
                     </div>
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1 ml-1">Duration (minutes)</label>
+                        <label class="block text-xs font-medium text-muted mb-1 ml-1">Duration (minutes)</label>
                         <div class="flex flex-wrap gap-2 w-full">
-                            <button type="button" class="quick-time bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded-lg text-xs flex-grow-0 text-white" data-min="15">15m</button>
-                            <button type="button" class="quick-time bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded-lg text-xs flex-grow-0 text-white" data-min="30">30m</button>
-                            <button type="button" class="quick-time bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded-lg text-xs flex-grow-0 text-white" data-min="60">1h</button>
+                            <button type="button" class="quick-time bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded-lg text-xs flex-grow-0 text-main" data-min="15">15m</button>
+                            <button type="button" class="quick-time bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded-lg text-xs flex-grow-0 text-main" data-min="30">30m</button>
+                            <button type="button" class="quick-time bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded-lg text-xs flex-grow-0 text-main" data-min="60">1h</button>
                             <input type="number" id="input-duration" class="glass-input flex-grow min-w-[100px] px-4 py-2 rounded-xl text-base" placeholder="Mins" required min="1">
                         </div>
                     </div>
                     <div class="flex gap-3 mt-6">
-                        <button type="button" id="btn-cancel-modal" class="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-sm font-medium transition-colors text-white">Cancel</button>
+                        <button type="button" id="btn-cancel-modal" class="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-sm font-medium transition-colors text-main">Cancel</button>
                         <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl shadow-lg shadow-blue-500/30 text-sm font-medium transition-all transform active:scale-95">Save</button>
                     </div>
                 </form>
@@ -426,16 +419,16 @@
             <div class="glass-panel w-full max-w-sm p-6 rounded-2xl shadow-2xl" id="confirm-modal-content">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="bg-emerald-500/20 p-2 rounded-full text-emerald-400"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div>
-                    <h3 class="text-xl font-bold text-white">Task Completed!</h3>
+                    <h3 class="text-xl font-bold text-main">Task Completed!</h3>
                 </div>
-                <p class="text-slate-300 text-sm mb-4">How long did <span id="confirm-task-name" class="font-bold text-white">Task Name</span> actually take?</p>
+                <p class="text-slate-300 text-sm mb-4">How long did <span id="confirm-task-name" class="font-bold text-main">Task Name</span> actually take?</p>
                 <form id="confirm-time-form" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1 ml-1">Actual Duration (minutes)</label>
+                        <label class="block text-xs font-medium text-muted mb-1 ml-1">Actual Duration (minutes)</label>
                         <input type="number" id="confirm-duration" class="glass-input w-full px-4 py-3 rounded-xl text-base font-bold text-emerald-400" required min="1">
                     </div>
                     <div class="flex gap-3 mt-6">
-                        <button type="button" id="btn-cancel-confirm" class="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-sm font-medium transition-colors text-white">Cancel</button>
+                        <button type="button" id="btn-cancel-confirm" class="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-sm font-medium transition-colors text-main">Cancel</button>
                         <button type="submit" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl shadow-lg shadow-emerald-500/30 text-sm font-medium transition-all transform active:scale-95">Confirm</button>
                     </div>
                 </form>
@@ -446,11 +439,11 @@
             <div class="glass-panel w-full max-w-sm p-6 rounded-2xl shadow-2xl">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="bg-red-500/20 p-2 rounded-full text-red-400"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
-                    <h3 class="text-xl font-bold text-white">Start Fresh?</h3>
+                    <h3 class="text-xl font-bold text-main">Start Fresh?</h3>
                 </div>
                 <p class="text-slate-300 text-sm mb-6">This will wipe the current board clean. This action cannot be undone manually.</p>
                 <div class="flex gap-3">
-                    <button id="btn-cancel-wipe" class="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-sm font-medium transition-colors text-white">Cancel</button>
+                    <button id="btn-cancel-wipe" class="flex-1 py-3 rounded-xl border border-white/10 hover:bg-white/5 text-sm font-medium transition-colors text-main">Cancel</button>
                     <button id="btn-confirm-wipe" class="flex-1 bg-red-600 hover:bg-red-500 text-white py-3 rounded-xl shadow-lg shadow-red-500/30 text-sm font-medium transition-all transform active:scale-95">Wipe Board</button>
                 </div>
             </div>
@@ -458,7 +451,7 @@
 
         <div id="report-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div class="glass-panel w-full max-w-xs p-6 rounded-2xl shadow-2xl">
-                <h3 class="text-lg font-bold mb-4 text-white">Report Options</h3>
+                <h3 class="text-lg font-bold mb-4 text-main">Report Options</h3>
                 <div class="flex items-center justify-between mb-6">
                     <span class="text-sm text-slate-300">Simple View (AM/PM)</span>
                     <label class="relative inline-flex items-center cursor-pointer">
@@ -481,7 +474,6 @@
     </div>
 
     <script type="module">
-        // 1. USE CDN LINKS (Required for HTML-only apps)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence, browserSessionPersistence, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -519,20 +511,12 @@
             shiftHours: 9.5, 
             simpleReport: false
         };
-        // NOTE: Using 'current_state' allows rolling data that persists across days
         const PERSISTENT_DOC_ID = 'current_state'; 
         
-        let isDragging = false;
         let draggedItemTemp = null; 
-        
-        // Auth State
         let isSignUp = false;
-
-        // Undo State
         let deletedItemState = null; 
         let undoTimeout = null;
-
-        // Theme State
         let isLightMode = false;
 
         // --- DOM Elements ---
@@ -638,9 +622,8 @@
             document.getElementById('current-date').textContent = dateText;
         }
 
-        // --- Data Logic (UPDATED FOR PERSISTENCE) ---
+        // --- Data Logic ---
         function getDocRef() {
-            // Shared DB logic: Loggr data lives in /artifacts/loggr-prod/users/...
             if (isPreviewEnv) {
                 return doc(db, 'artifacts', appId, 'users', currentUser.uid, 'logs', PERSISTENT_DOC_ID);
             } else {
@@ -740,10 +723,10 @@
             if (undoTimeout) clearTimeout(undoTimeout);
         }
 
-        // --- Time Calculations ---
+        // --- Time Calculations (Dynamic for Both) ---
         function calculateTimes() {
+            // 1. Calculate SOD Waterfall
             let currentMinutes = timeStringToMinutes(settings.startTime);
-            
             sodItems = sodItems.map(item => {
                 const startMins = currentMinutes;
                 const endMins = currentMinutes + parseInt(item.duration);
@@ -753,7 +736,24 @@
                     ...item,
                     startTime: minutesToTime(startMins),
                     endTime: minutesToTime(endMins),
-                    rawStart: startMins 
+                    rawStart: startMins,
+                    rawEnd: endMins
+                };
+            });
+
+            // 2. Calculate EOD Waterfall (Strictly Sequential)
+            // Reset to start time
+            currentMinutes = timeStringToMinutes(settings.startTime);
+            
+            eodItems = eodItems.map(item => {
+                const startMins = currentMinutes;
+                const endMins = currentMinutes + parseInt(item.duration);
+                currentMinutes = endMins;
+
+                return {
+                    ...item,
+                    displayStartTime: minutesToTime(startMins),
+                    displayEndTime: minutesToTime(endMins)
                 };
             });
         }
@@ -813,12 +813,12 @@
                 sodBar.classList.remove('from-blue-600', 'to-cyan-500');
                 sodBar.classList.add('bg-red-500');
                 document.getElementById('sod-capacity-text').textContent = `${formatDuration(totalSodMins)} (Over)`;
-                document.getElementById('sod-capacity-text').classList.add('text-red-400');
+                document.getElementById('sod-capacity-text').className = 'text-accent-red'; // Dynamic Class
             } else {
                 sodBar.classList.add('from-blue-600', 'to-cyan-500');
                 sodBar.classList.remove('bg-red-500');
                 document.getElementById('sod-capacity-text').textContent = `${Math.round(sodPct)}% Planned`;
-                document.getElementById('sod-capacity-text').classList.remove('text-red-400');
+                document.getElementById('sod-capacity-text').className = 'text-accent-blue'; // Dynamic Class
             }
 
             // EOD Progress
@@ -849,7 +849,8 @@
 
         function createCard(item, index, type) {
             const div = document.createElement('div');
-            div.className = 'glass-card p-4 mb-3 rounded-xl cursor-grab active:cursor-grabbing flex justify-between items-center group relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500';
+            
+            div.className = `glass-card p-4 mb-3 rounded-xl cursor-grab active:cursor-grabbing flex justify-between items-center group relative overflow-hidden focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500`;
             div.setAttribute('tabindex', '0');
             div.dataset.id = item.id;
             div.dataset.index = index; 
@@ -857,36 +858,36 @@
 
             const barColor = type === 'sod' ? 'bg-blue-500' : 'bg-emerald-500';
             
-            // --- EOD Layout Logic (Dynamic row layout) ---
+            // --- EOD Layout Logic ---
             let footerContent = '';
             if (type === 'sod') {
-                footerContent = `<span class="bg-white/5 px-2 py-0.5 rounded text-blue-300">${item.startTime} - ${item.endTime}</span>`;
+                // SOD: Using dynamic class .text-accent-blue
+                footerContent = `<span class="bg-white/5 px-2 py-0.5 rounded text-accent-blue">${item.startTime} - ${item.endTime}</span>`;
             } else {
-                // EOD: Show Duration AND Time Range on the SAME row
-                const durationText = `<span class="text-emerald-300 font-bold">${formatDuration(item.duration)}</span>`;
+                // EOD: Show Duration AND Time Range (Dynamic with Custom Color Classes)
+                const durationText = `<span class="text-eod-duration font-bold">${formatDuration(item.duration)}</span>`;
                 
-                let timeRangeText = '';
-                if (item.actualStartTime && item.actualEndTime) {
-                    timeRangeText = `<span class="text-slate-500 ml-auto">${item.actualStartTime} - ${item.actualEndTime}</span>`;
-                } else {
-                    // Fallback for manual items without timestamps
-                    timeRangeText = `<span class="text-slate-600 ml-auto text-[10px] uppercase">Manual</span>`;
-                }
+                const timeText = item.displayStartTime 
+                    ? `<span class="text-eod-time ml-auto">${item.displayStartTime} - ${item.displayEndTime}</span>`
+                    : '';
                 
-                footerContent = `<div class="flex items-center justify-between w-full">${durationText}${timeRangeText}</div>`;
+                footerContent = `<div class="flex items-center justify-between w-full">${durationText}${timeText}</div>`;
             }
 
+            // Updated static classes (text-white -> text-main, text-slate-300 -> text-muted, etc.)
             div.innerHTML = `
                 <div class="absolute left-0 top-0 bottom-0 w-1 ${barColor} opacity-70"></div>
                 <div class="flex-1 pl-3 w-full">
                     <div class="flex justify-between items-start mb-1">
-                        <span class="font-semibold text-sm text-white">${item.title}</span>
-                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button class="edit-btn p-1 hover:bg-white/10 rounded" title="Edit" tabindex="-1"><i data-lucide="pencil" class="w-3 h-3 text-slate-300"></i></button>
+                        <span class="font-semibold text-sm text-main flex items-center gap-2">
+                           ${item.title}
+                        </span>
+                        <div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button class="edit-btn p-1 hover:bg-white/10 rounded" title="Edit" tabindex="-1"><i data-lucide="pencil" class="w-3 h-3 text-muted"></i></button>
                             ${type === 'sod' ? `<button class="move-eod-btn p-1 hover:bg-emerald-500/20 text-emerald-400 rounded" title="Complete" tabindex="-1"><i data-lucide="check" class="w-3 h-3"></i></button>` : ''}
                         </div>
                     </div>
-                    <div class="flex items-center text-xs text-slate-400 font-mono w-full">
+                    <div class="flex items-center text-xs text-muted font-mono w-full">
                         ${footerContent}
                     </div>
                 </div>
@@ -998,14 +999,11 @@
             });
         }
 
-        // --- Logic: Moving SOD to EOD (Locked Times) ---
+        // --- Logic: Moving SOD to EOD ---
         function initiateMoveToEod(item, sodIndexToRemove = null) {
-            // Capture the currently calculated schedule from SOD to "lock" it
             draggedItemTemp = { 
                 ...item, 
-                sodIndex: sodIndexToRemove !== null ? sodIndexToRemove : sodItems.indexOf(item),
-                lockedStartTime: item.startTime, // From SOD calculation
-                lockedEndTime: item.endTime      // From SOD calculation
+                sodIndex: sodIndexToRemove !== null ? sodIndexToRemove : sodItems.indexOf(item)
             };
             
             document.getElementById('confirm-task-name').textContent = item.title;
@@ -1195,22 +1193,15 @@
                 });
             });
 
-            // --- Confirm Move / Locked Time Logic ---
+            // --- Confirm Move ---
             document.getElementById('confirm-time-form').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const actualDuration = parseInt(document.getElementById('confirm-duration').value);
                 
-                // Logic:
-                // If the user confirms a duration roughly equal to what was planned,
-                // we assume they did it at the "locked" time slot.
-                
                 const newItem = {
                     id: Date.now().toString(), 
                     title: draggedItemTemp.title,
-                    duration: actualDuration,
-                    // Store the locked times for display
-                    actualStartTime: draggedItemTemp.lockedStartTime,
-                    actualEndTime: draggedItemTemp.lockedEndTime
+                    duration: actualDuration
                 };
 
                 eodItems.push(newItem);
@@ -1325,7 +1316,7 @@
         function generateEODReport() {
             let text = `EOD - ${document.getElementById('current-date').textContent}\n\n`;
             eodItems.forEach(i => {
-                text += `• ${i.title} (${formatDuration(i.duration)})\n`;
+                 text += `• ${i.title} (${i.displayStartTime} - ${i.displayEndTime})\n`;
             });
             copyToClipboard(text);
         }
