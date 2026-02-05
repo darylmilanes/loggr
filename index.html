@@ -1316,7 +1316,7 @@
         function generateEODReport() {
             let text = `EOD - ${document.getElementById('current-date').textContent}\n\n`;
             eodItems.forEach(i => {
-                 text += `• ${i.title} (${i.displayStartTime} - ${i.displayEndTime})\n`;
+                 text += `• ${i.title} (${formatDuration(i.duration)})\n`;
             });
             copyToClipboard(text);
         }
