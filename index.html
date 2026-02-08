@@ -725,12 +725,32 @@
 
         // --- Time Calculations (Dynamic for Both) ---
         function calculateTimes() {
-            // 1. Calculate SOD Waterfall
+            // 1. Initialize Time Counter from Shift Start
             let currentMinutes = timeStringToMinutes(settings.startTime);
+
+            // 2. Calculate EOD Waterfall First
+            // EOD still uses shift start by default for its first item.
+            // We calculate how much time has passed based on completed items.
+            eodItems = eodItems.map(item => {
+                const startMins = currentMinutes;
+                const endMins = currentMinutes + parseInt(item.duration);
+                currentMinutes = endMins; // Increment time counter
+
+                return {
+                    ...item,
+                    displayStartTime: minutesToTime(startMins),
+                    displayEndTime: minutesToTime(endMins)
+                };
+            });
+
+            // 3. Calculate SOD Waterfall
+            // Crucial: We do NOT reset currentMinutes here.
+            // If EOD has items, SOD starts where EOD ended.
+            // If EOD is empty, currentMinutes is still at Shift Start.
             sodItems = sodItems.map(item => {
                 const startMins = currentMinutes;
                 const endMins = currentMinutes + parseInt(item.duration);
-                currentMinutes = endMins;
+                currentMinutes = endMins; // Increment time counter
                 
                 return {
                     ...item,
@@ -738,22 +758,6 @@
                     endTime: minutesToTime(endMins),
                     rawStart: startMins,
                     rawEnd: endMins
-                };
-            });
-
-            // 2. Calculate EOD Waterfall (Strictly Sequential)
-            // Reset to start time
-            currentMinutes = timeStringToMinutes(settings.startTime);
-            
-            eodItems = eodItems.map(item => {
-                const startMins = currentMinutes;
-                const endMins = currentMinutes + parseInt(item.duration);
-                currentMinutes = endMins;
-
-                return {
-                    ...item,
-                    displayStartTime: minutesToTime(startMins),
-                    displayEndTime: minutesToTime(endMins)
                 };
             });
         }
